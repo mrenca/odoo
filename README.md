@@ -6,27 +6,50 @@
 Odoo
 ----
 
-Odoo is a suite of web based open source business apps.
+gOdoo es un fork del ERP basado en web y de código abierto <a href="https://www.odoo.com/">Odoo</a>, ajustada para su uso en gobiernos locales.
 
-The main Odoo Apps include an <a href="https://www.odoo.com/page/crm">Open Source CRM</a>,
-<a href="https://www.odoo.com/app/website">Website Builder</a>,
-<a href="https://www.odoo.com/app/ecommerce">eCommerce</a>,
-<a href="https://www.odoo.com/app/inventory">Warehouse Management</a>,
-<a href="https://www.odoo.com/app/project">Project Management</a>,
-<a href="https://www.odoo.com/app/accounting">Billing &amp; Accounting</a>,
-<a href="https://www.odoo.com/app/point-of-sale-shop">Point of Sale</a>,
-<a href="https://www.odoo.com/app/employees">Human Resources</a>,
-<a href="https://www.odoo.com/app/social-marketing">Marketing</a>,
-<a href="https://www.odoo.com/app/manufacturing">Manufacturing</a>,
-<a href="https://www.odoo.com/">...</a>
+Este fork mantenido por la <a href="https://www.renca.cl/">Municipalidad de Renca</a> utiliza la edición community y es distribuído para la licencia GPL-XXX.
 
-Odoo Apps can be used as stand-alone applications, but they also integrate seamlessly so you get
-a full-featured <a href="https://www.odoo.com">Open Source ERP</a> when you install several Apps.
+¿Cómo probar?
+-------------
 
-Getting started with Odoo
--------------------------
+Requerimientos:
+- Python 3.7 o superior
+- PostgreSQL 12 o superior
+- Git
 
-For a standard installation please follow the <a href="https://www.odoo.com/documentation/16.0/administration/install/install.html">Setup instructions</a>
-from the documentation.
+Lo siguiente requiere que tengas Git instalado en tu máquina local y que tengas nociones básicas de los comandos de Git.
 
-To learn the software, we recommend the <a href="https://www.odoo.com/slides">Odoo eLearning</a>, or <a href="https://www.odoo.com/page/scale-up-business-game">Scale-up</a>, the <a href="https://www.odoo.com/page/scale-up-business-game">business game</a>. Developers can start with <a href="https://www.odoo.com/documentation/16.0/developer/howtos.html">the developer tutorials</a>
+Primero clonamos localmente el repositorio de github
+```sh
+git clone https://github.com/mrenca/odoo.git
+```
+
+Luego instalamos las dependencias del proyecto
+```sh
+cd odoo
+pip3 install setuptools wheel
+pip3 install -r requirements.txt
+```
+
+Entramos a la consola de postgresql para crear el usuario, la base de datos y entregamos los accesos
+```sh
+psql postgres
+```
+```sql
+CREATE DATABASE odoo;
+CREATE ROLE odoo WITH LOGIN PASSWORD 'odoo';
+GRANT ALL PRIVILEGES ON DATABASE odoo TO odoo;
+```
+
+Finalmente, ejecutamos odoo indicando el nombre de la base de datos en el parámetro `-d odoo`. Si es la primera vez, debemos incorporar el parámetro `-i base` que inicializa el esquema de datos.
+```sh
+python3 odoo-bin --addons-path=addons -d odoo -i base
+```
+
+¿Cómo continuar?
+-----------------
+
+Para una instalación estandar favor referirse a la documentación oficial de odoo, en la sección <a href="https://www.odoo.com/documentation/16.0/es/administration/install/install.html#setup-install-source">source install</a>. IMPORTANTE: Verificar que al hacer el git clone lo efectúes del presente fork.
+
+Para conocer el más detalles sobre el software puedes referirte a <a href="https://www.odoo.com/slides">Odoo eLearning</a>. Si eres desarrollador puedes empezar por el <a href="https://www.odoo.com/documentation/16.0/developer/howtos.html">tutorial para desarrollador</a>.
