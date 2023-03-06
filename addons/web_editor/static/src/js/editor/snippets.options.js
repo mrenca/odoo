@@ -946,6 +946,16 @@ const SelectUserValueWidget = BaseSelectionUserValueWidget.extend({
      */
     async start() {
         await this._super(...arguments);
+        if (!this.menuEl.children.length) {
+            // Remove empty text nodes so that :empty css rule can work
+            // TODO this has been added here as a fix to be extra careful. In
+            // master we should just avoid adding text nodes inside
+            // we-selection-items in the first place.
+            while (this.menuEl.firstChild
+                    && !this.menuEl.firstChild.data.trim().length) {
+                this.menuEl.firstChild.remove();
+            }
+        }
 
         if (this.options && this.options.valueEl) {
             this.containerEl.insertBefore(this.options.valueEl, this.menuEl);
@@ -3593,6 +3603,12 @@ const SnippetOptionWidget = Widget.extend({
                 }
 
                 const dependencies = widget.getDependencies();
+
+                if (dependencies.length === 1 && dependencies[0] === 'fake') {
+                    widget.toggleVisibility(false);
+                    return;
+                }
+
                 const dependenciesData = [];
                 dependencies.forEach(depName => {
                     const toBeActive = (depName[0] !== '!');
@@ -4523,7 +4539,8 @@ registry.sizing = SnippetOptionWidget.extend({
                 const isGridHandle = handleEl.classList.contains('o_grid_handle');
                 handleEl.classList.toggle('d-none', isGrid ^ isGridHandle);
                 // Disabling the resize if we are in mobile view.
-                handleEl.classList.toggle('readonly', isMobileView && isGridHandle);
+                const isHorizontalSizing = handleEl.matches('.e, .w');
+                handleEl.classList.toggle('readonly', isMobileView && (isHorizontalSizing || isGridHandle));
             }
 
             // Hiding the move handle in mobile view so we can't drag the
@@ -5243,9 +5260,6 @@ registry.layout_column = SnippetOptionWidget.extend({
         }
         // Removing the grid properties.
         delete rowEl.dataset.rowCount;
-
-        // Adding back an align-items-* class.
-        rowEl.classList.add('align-items-start');
     },
     /**
      * Removes the padding highlights that were added when changing the grid
@@ -5258,6 +5272,22 @@ registry.layout_column = SnippetOptionWidget.extend({
         rowEl.removeEventListener('animationend', rowEl._removePaddingPreview);
         rowEl.classList.remove('o_we_padding_highlight');
         delete rowEl._removePaddingPreview;
+    },
+});
+
+registry.vAlignment = SnippetOptionWidget.extend({
+    /**
+     * @override
+     */
+    async _computeWidgetState(methodName, params) {
+        const value = await this._super(...arguments);
+        if (methodName === 'selectClass' && !value) {
+            // If there is no `align-items-` class on the row, then the `align-
+            // items-stretch` class is selected, because the behaviors are
+            // equivalent in both situations.
+            return 'align-items-stretch';
+        }
+        return value;
     },
 });
 
@@ -6756,7 +6786,12 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
      */
     shape(previewMode, widgetValue, params) {
         this._handlePreviewState(previewMode, () => {
-            return {shape: widgetValue, colors: this._getImplicitColors(widgetValue, this._getShapeData().colors), flip: []};
+            return {
+                shape: widgetValue,
+                colors: this._getImplicitColors(widgetValue, this._getShapeData().colors),
+                flip: [],
+                animated: params.animated,
+            };
         });
     },
     /**
@@ -6938,7 +6973,7 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         // Updates/removes the shape container as needed and gives it the
         // correct background shape
         const json = target.dataset.oeShapeData;
-        const {shape, colors, flip = []} = json ? JSON.parse(json) : {};
+        const {shape, colors, flip = [], animated = 'false'} = json ? JSON.parse(json) : {};
         let shapeContainer = target.querySelector(':scope > .o_we_shape');
         if (!shape) {
             return this._insertShapeContainer(null);
@@ -6949,6 +6984,8 @@ registry.BackgroundShape = SnippetOptionWidget.extend({
         }
         // Compat: remove old flip classes as flipping is now done inside the svg
         shapeContainer.classList.remove('o_we_flip_x', 'o_we_flip_y');
+
+        shapeContainer.classList.toggle('o_we_animated', animated === 'true');
 
         if (colors || flip.length) {
             // Custom colors/flip, overwrite shape that is set by the class

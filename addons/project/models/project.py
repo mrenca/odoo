@@ -1193,7 +1193,7 @@ class Task(models.Model):
     allow_subtasks = fields.Boolean(string="Allow Sub-tasks", related="project_id.allow_subtasks", readonly=True)
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count')
     email_from = fields.Char(string='Email From', help="These people will receive email.", index='trigram',
-        compute='_compute_email_from', recursive=True, store=True, readonly=False)
+        compute='_compute_email_from', recursive=True, store=True, readonly=False, copy=False)
     project_privacy_visibility = fields.Selection(related='project_id.privacy_visibility', string="Project Visibility")
     # Computed field about working time elapsed between record creation and assignation/closing.
     working_hours_open = fields.Float(compute='_compute_elapsed', string='Working Hours to Assign', digits=(16, 2), store=True, group_operator="avg")
@@ -1212,6 +1212,7 @@ class Task(models.Model):
         readonly=False,
         store=True,
         tracking=True,
+        index='btree_not_null',
         help="Deliver your services automatically when a milestone is reached by linking it to a sales order item."
     )
     has_late_and_unreached_milestone = fields.Boolean(
@@ -2247,6 +2248,7 @@ class Task(models.Model):
                     record_name=task.display_name,
                     email_layout_xmlid='mail.mail_notification_layout',
                     model_description=task_model_description,
+                    mail_auto_delete=False,
                 )
 
     def _message_auto_subscribe_followers(self, updated_values, default_subtype_ids):

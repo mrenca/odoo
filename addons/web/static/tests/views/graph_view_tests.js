@@ -2191,7 +2191,7 @@ QUnit.module("Views", (hooks) => {
                 { bar: true, revenue: 2 },
                 { bar: false, revenue: -3 },
             ];
-            await makeView({
+            const graph = await makeView({
                 serverData,
                 type: "graph",
                 resModel: "foo",
@@ -2202,12 +2202,15 @@ QUnit.module("Views", (hooks) => {
                     </graph>
                 `,
             });
-            assert.containsOnce(target, ".o_view_nocontent");
-            assert.strictEqual(
-                target.querySelector(".o_view_nocontent").innerText.replace(/[\s\n]/g, " "),
-                `Invalid data  Pie chart cannot mix positive and negative numbers. Try to change your domain to only display positive results`
-            );
-            assert.containsNone(target, ".o_graph_canvas_container");
+            assert.containsNone(target, ".o_view_nocontent");
+            assert.containsOnce(target, ".o_graph_canvas_container");
+            checkDatasets(assert, graph, ["backgroundColor", "borderColor", "data", "label", "stack"], {
+                backgroundColor: ["#1f77b4"],
+                borderColor: getBorderWhite(),
+                data: [2],
+                label: "",
+                stack: undefined,
+            });
         }
     );
 
@@ -2477,24 +2480,34 @@ QUnit.module("Views", (hooks) => {
                 graph_mode: "bar",
                 graph_measure: "__count",
                 graph_groupbys: ["product_id"],
+                graph_order: null,
+                graph_stacked: true,
                 group_by: [],
             },
             {
                 graph_mode: "bar",
                 graph_measure: "foo",
                 graph_groupbys: ["product_id"],
+                graph_order: null,
+                graph_stacked: true,
                 group_by: [],
             },
             {
                 graph_mode: "line",
                 graph_measure: "foo",
+                graph_cumulated: false,
                 graph_groupbys: ["product_id"],
+                graph_order: null,
+                graph_stacked: true,
                 group_by: [],
             },
             {
                 graph_mode: "line",
                 graph_measure: "foo",
+                graph_cumulated: false,
                 graph_groupbys: ["product_id", "color_id"],
+                graph_order: null,
+                graph_stacked: true,
                 group_by: ["product_id", "color_id"],
             },
         ];

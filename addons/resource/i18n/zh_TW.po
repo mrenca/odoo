@@ -43,7 +43,7 @@ msgstr "下午"
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_calendar_search
 #: model_terms:ir.ui.view,arch_db:resource.view_resource_resource_search
 msgid "Archived"
-msgstr "已歸檔"
+msgstr "已封存"
 
 #. module: resource
 #: model_terms:ir.ui.view,arch_db:resource.resource_calendar_form
@@ -253,6 +253,12 @@ msgid ""
 "If the active field is set to false, it will allow you to hide the Working "
 "Time without removing it."
 msgstr "如果啟用欄位設定為未啟用，它將允許您隱藏工作時間而不將其刪除."
+
+#. module: resource
+#: code:addons/resource/models/resource.py:0
+#, python-format
+msgid "Impossible to switch calendar type for the default company schedule."
+msgstr ""
 
 #. module: resource
 #: code:addons/resource/models/resource.py:0
