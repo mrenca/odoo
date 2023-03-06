@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<odoo>
+    <record id="purchase_order_view_tree_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.view.tree.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_kpis_tree"/>
+        <field name="arch" type="xml">
+            <field name="user_id" position="replace">
+                <field name="user_department" string="Solicitante"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="purchase_order_form_inherit" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <!-- <button name="button_approve" position="attributes">
+                <attribute name="groups">purchase.group_purchase_user</attribute>
+            </button> -->
+            <field name="partner_id" position="before">
+                <field name="user_department" string="Solicitante"/>
+                <field name="department_manager" string="Manager"/>
+            </field>
+            <xpath expr="//page[@name='products']" position="after">
+                <page name="approvals" string="Aprobaciones">
+                    <field name="workflow_approval"
+                        widget="section_and_note_one2many"
+                        context="{'default_state': 'draft'}"
+                        attrs="{'readonly': True}">
+                        <tree string="Aprobaciones">
+                            <field name="step_name" />
+                            <field name="approved" />
+                            <field name="completed" />
+                            <field name="write_uid"/>
+                            <field name="write_date"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="custom_workflow_step_form" model="ir.ui.view">
+        <field name="name">custom.workflow.step.form</field>
+        <field name="model">custom.workflow.step</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name" string="Nombre" />
+                        <field name="sequence" string="Secuencia" />
+                        <field name="workflow_id" string="Flujo" />
+                        <field name="manager_approval" string="Aprobación de director de área" />
+                        <field name="user_ids" string="Usuarios" widget="many2many_tags" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="custom_workflow_form" model="ir.ui.view">
+        <field name="name">custom.workflow.form</field>
+        <field name="model">custom.workflow</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name" string="Nombre" />
+                        <field name="entity" string="Entidad" />
+                        <field name="step" string="Aprobaciones" context="{'form_view_ref': 'purchase_approval.custom_workflow_step_form'}"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="custom_workflow_tree" model="ir.ui.view">
+        <field name="name">custom.workflow.tree</field>
+        <field name="model">custom.workflow</field>
+        <field name="arch" type="xml">
+            <tree string="Custom workflow">
+                <field name="name" string="Nombre" />
+                <field name="entity" string="Entidad" />
+                <field name="write_uid"/>
+                <field name="write_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="custom_workflow_action" model="ir.actions.act_window">
+        <field name="name">Custom workflow</field>
+        <field name="res_model">custom.workflow</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="custom_workflow_menu_action" name="Workflow" parent="purchase.menu_purchase_config"
+    sequence="2" action="custom_workflow_action" />
+</odoo>
