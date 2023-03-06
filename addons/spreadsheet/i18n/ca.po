@@ -3516,7 +3516,7 @@ msgstr "Número de fila d'una cel·la especificada."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.xml:0
 #, python-format
 msgid "Save"
-msgstr "Desa"
+msgstr "Desar"
 
 #. module: spreadsheet
 #. odoo-javascript
@@ -4980,7 +4980,7 @@ msgstr "El text, una part del qual es substituirà."
 #: code:addons/spreadsheet/static/src/o_spreadsheet/o_spreadsheet.js:0
 #, python-format
 msgid "The time_string (%s) cannot be parsed to date/time."
-msgstr "La cadena de temps (%s) no es pot analitzar a data/hora."
+msgstr "La time_string (%s) no es pot analitzar a data/hora."
 
 #. module: spreadsheet
 #. odoo-javascript

@@ -33,7 +33,7 @@ import {
     toggleMenuItem,
     validateSearch,
 } from "@web/../tests/search/helpers";
-import { makeView, setupViewRegistries } from "@web/../tests/views/helpers";
+import { makeView, makeViewInDialog, setupViewRegistries } from "@web/../tests/views/helpers";
 import { createWebClient, doAction } from "@web/../tests/webclient/helpers";
 import { browser } from "@web/core/browser/browser";
 import { errorService } from "@web/core/errors/error_service";
@@ -2984,7 +2984,7 @@ QUnit.module("Fields", (hooks) => {
         await editInput(target, ".o_field_widget[name='product_id'] input", "abcd");
         await click(target.querySelector(".o_field_widget[name='product_id'] .dropdown-item"));
         await nextTick(); // wait for the error service to ensure that there's no error dialog
-        assert.containsNone(target, ".o_form_error_dialog");
+        assert.containsNone(target, ".o_dialog_error");
         assert.containsOnce(target, ".modal .o_form_view");
         assert.strictEqual(
             target.querySelector(".modal .o_field_widget[name='name'] input").value,
@@ -3017,7 +3017,7 @@ QUnit.module("Fields", (hooks) => {
             arch: '<form><field name="p" /></form>',
             mockRPC(route, { args, method }) {
                 if (method === "name_create") {
-                    return Promise.reject();
+                    throw new RPCError("Something went wrong");
                 }
                 if (method === "create") {
                     assert.deepEqual(args[0], { name: "xyz" });
@@ -3251,10 +3251,7 @@ QUnit.module("Fields", (hooks) => {
         await click(target, ".o_field_widget[name=trululu] input");
         await selectDropdownItem(target, "trululu", "Create and edit...");
 
-        assert.strictEqual(
-            target.querySelector(".o_field_widget[name=foo] input").value,
-            "yz"
-        );
+        assert.strictEqual(target.querySelector(".o_field_widget[name=foo] input").value, "yz");
 
         await clickDiscard(target.querySelector(".modal"));
     });
@@ -4429,5 +4426,107 @@ QUnit.module("Fields", (hooks) => {
 
         assert.verifySteps(["get_formview_id"]);
         assert.containsOnce(target, ".modal");
+    });
+
+    QUnit.test("external_button opens a FormViewDialog in dialogs", async function (assert) {
+        await makeViewInDialog({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="trululu"/></form>',
+            mockRPC(route, { method }) {
+                if (method === "get_formview_id") {
+                    assert.step("get_formview_id");
+                    return false;
+                }
+            },
+        });
+        assert.containsOnce(target, ".modal");
+
+        await selectDropdownItem(target, "trululu", "first record");
+        assert.containsOnce(target, ".o_field_widget .o_external_button.fa-external-link");
+        await click(target, ".o_field_widget .o_external_button");
+
+        assert.verifySteps(["get_formview_id"]);
+        assert.containsN(target, ".modal", 2);
+    });
+
+    QUnit.test("keep changes when editing related record in a dialog", async function (assert) {
+        serverData.views = {
+            "partner,98,form": '<form><field name="int_field"/></form>',
+        };
+        await makeViewInDialog({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="foo"/><field name="trululu"/></form>',
+            mockRPC(route, { method }) {
+                if (method === "get_formview_id") {
+                    return 98;
+                }
+                if (method === "write") {
+                    assert.step("write");
+                }
+            },
+        });
+        assert.containsOnce(target, ".modal");
+
+        await editInput(target, ".o_field_widget[name=foo] input", "some value");
+        await selectDropdownItem(target, "trululu", "first record");
+        assert.containsOnce(target, ".o_field_widget .o_external_button.fa-external-link");
+        await click(target, ".o_field_widget .o_external_button");
+        assert.containsN(target, ".modal", 2);
+
+        const secondDialog = target.querySelector(".o_dialog:not(.o_inactive_modal)");
+        await editInput(secondDialog, ".o_field_widget[name=int_field] input", "5464");
+        await click(secondDialog.querySelector(".modal-footer .btn-primary:not(.d-none)"));
+
+        assert.containsOnce(target, ".modal");
+        assert.strictEqual(
+            target.querySelector(".o_field_widget[name=foo] input").value,
+            "some value"
+        );
+        assert.verifySteps(["write"]);
+    });
+
+    QUnit.test("create and edit, save and then discard", async function (assert) {
+        serverData.views = {
+            "partner,98,form": '<form><field name="name"/></form>',
+        };
+        await makeView({
+            type: "form",
+            resModel: "partner",
+            serverData,
+            arch: '<form><field name="trululu"/></form>',
+            resId: 1,
+            mockRPC(route, { method }) {
+                if (method === "get_formview_id") {
+                    return 98;
+                }
+            },
+        });
+
+        assert.strictEqual(
+            target.querySelector(".o_field_widget[name=trululu] input").value,
+            "aaa"
+        );
+
+        await editInput(target, ".o_field_widget[name=trululu] input", "new m2o");
+        await click(target.querySelector(".o_field_widget[name=trululu] input"));
+        await selectDropdownItem(target, "trululu", "Create and edit...");
+        assert.containsOnce(target, ".modal");
+
+        await click(target.querySelector(".modal-footer .btn-primary:not(.d-none)"));
+        assert.containsNone(target, ".modal");
+        assert.strictEqual(
+            target.querySelector(".o_field_widget[name=trululu] input").value,
+            "new m2o"
+        );
+
+        await clickDiscard(target);
+        assert.strictEqual(
+            target.querySelector(".o_field_widget[name=trululu] input").value,
+            "aaa"
+        );
     });
 });

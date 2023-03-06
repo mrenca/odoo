@@ -974,7 +974,7 @@ msgstr ""
 msgid ""
 "You don't have any input valuation account defined on your product category."
 " You must define one before processing this operation."
-msgstr "商品カテゴリに入庫評価勘定が定義されていません。この操作を行う前に、入庫評価勘定を定義する必要があります。"
+msgstr "プロダクトカテゴリに入庫評価勘定が定義されていません。この操作を行う前に、入庫評価勘定を定義する必要があります。"
 
 #. module: stock_account
 #. odoo-python
@@ -1004,7 +1004,7 @@ msgstr ""
 msgid ""
 "You don't have any stock valuation account defined on your product category."
 " You must define one before processing this operation."
-msgstr "商品カテゴリに定義されている在庫評価勘定はありません。 この操作を処理する前に定義する必要があります。"
+msgstr "プロダクトカテゴリに定義されている在庫評価勘定はありません。 この操作を処理する前に定義する必要があります。"
 
 #. module: stock_account
 #. odoo-python

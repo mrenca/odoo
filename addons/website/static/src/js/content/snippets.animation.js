@@ -988,6 +988,19 @@ registry.anchorSlide = publicWidget.Widget.extend({
             return;
         }
         var hash = this.$target[0].hash;
+        if (hash === '#top' || hash === '#bottom') {
+            // If the anchor targets #top or #bottom, directly call the
+            // "scrollTo" function. The reason is that the header or the footer
+            // could have been removed from the DOM. By receiving a string as
+            // parameter, the "scrollTo" function handles the scroll to the top
+            // or to the bottom of the document even if the header or the
+            // footer is removed from the DOM.
+            dom.scrollTo(hash, {
+                duration: 500,
+                extraOffset: this._computeExtraOffset(),
+            });
+            return;
+        }
         if (!utils.isValidAnchor(hash)) {
             return;
         }
@@ -1220,6 +1233,13 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
         // By default, elements are hidden by the css of o_animate.
         // Render elements and trigger the animation then pause it in state 0.
         this.$animatedElements = this.$target.find('.o_animate');
+        // Fix for "transform: none" not overriding keyframe transforms on
+        // iPhone 8 and lower.
+        this.forceOverflowXYHidden = false;
+        if (this.$animatedElements[0] && window.getComputedStyle(this.$animatedElements[0]).transform !== 'none') {
+            this._toggleOverflowXYHidden(true);
+            this.forceOverflowXYHidden = true;
+        }
         _.each(this.$animatedElements, el => {
             if (el.closest('.dropdown')) {
                 el.classList.add('o_animate_in_dropdown');
@@ -1310,6 +1330,9 @@ registry.WebsiteAnimate = publicWidget.Widget.extend({
      * @param {Boolean} add
      */
     _toggleOverflowXYHidden(add) {
+        if (this.forceOverflowXYHidden) {
+            return;
+        }
         if (add) {
             this.$scrollingElement[0].classList.add('o_wanim_overflow_xy_hidden');
         } else if (!this.$scrollingElement.find('.o_animating').length) {

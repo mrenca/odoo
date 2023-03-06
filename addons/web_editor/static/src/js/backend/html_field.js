@@ -58,7 +58,10 @@ export class HtmlFieldWysiwygAdapterComponent extends ComponentAdapter {
         const newCollaborationChannel = newProps.widgetArgs[0].collaborationChannel;
 
         if (
-            (newValue !== newProps.editingValue && lastValue !== newValue) ||
+            (
+                stripHistoryIds(newValue) !== stripHistoryIds(newProps.editingValue) &&
+                stripHistoryIds(lastValue) !== stripHistoryIds(newValue)
+            ) ||
             !_.isEqual(lastRecordInfo, newRecordInfo) ||
             !_.isEqual(lastCollaborationChannel, newCollaborationChannel))
         {
@@ -135,7 +138,7 @@ export class HtmlField extends Component {
                         // Ensure all external links are opened in a new tab.
                         retargetLinks(this.readonlyElementRef.el);
 
-                        const hasReadonlyModifiers = Boolean(this.props.record.activeFields[this.props.fieldName].modifiers.readonly);
+                        const hasReadonlyModifiers = Boolean(this.props.record.isReadonly(this.props.fieldName));
                         if (!hasReadonlyModifiers) {
                             const $el = $(this.readonlyElementRef.el);
                             $el.off('.checklistBinding');
@@ -222,7 +225,7 @@ export class HtmlField extends Component {
                 collaborationResId: parseInt(this.props.record.resId),
             },
             mediaModalParams: {
-                ...this.props.mediaModalParams,
+                ...this.props.wysiwygOptions.mediaModalParams,
                 res_model: this.props.record.resModel,
                 res_id: this.props.record.resId,
             },
@@ -275,7 +278,11 @@ export class HtmlField extends Component {
     async updateValue() {
         const value = this.getEditingValue();
         const lastValue = (this.props.value || "").toString();
-        if (value !== null && !(!lastValue && value === "<p><br></p>") && value !== lastValue) {
+        if (
+            value !== null &&
+            !(!lastValue && stripHistoryIds(value) === "<p><br></p>") &&
+            stripHistoryIds(value) !== stripHistoryIds(lastValue)
+        ) {
             this.props.setDirty(false);
             this.currentEditingValue = value;
             await this.props.update(value);
@@ -296,7 +303,7 @@ export class HtmlField extends Component {
             this.wysiwyg.toolbar.$el.append($codeviewButtonToolbar);
             $codeviewButtonToolbar.click(this.toggleCodeView.bind(this));
         }
-        this.wysiwyg.odooEditor.addEventListener("historyStep", () =>
+        this.wysiwyg.odooEditor.editable.addEventListener("input", () =>
             this.props.setDirty(this._isDirty())
         );
 
@@ -370,7 +377,9 @@ export class HtmlField extends Component {
         }
     }
     _isDirty() {
-        return !this.props.readonly && this.props.value.toString() !== this.getEditingValue();
+        const strippedPropValue = stripHistoryIds(String(this.props.value));
+        const strippedEditingValue = stripHistoryIds(this.getEditingValue());
+        return !this.props.readonly && strippedPropValue !== strippedEditingValue;
     }
     _getCodeViewEl() {
         return this.state.showCodeView && this.codeViewRef.el;
@@ -594,7 +603,10 @@ HtmlField.components = {
     TranslationButton,
     HtmlFieldWysiwygAdapterComponent,
 };
-HtmlField.defaultProps = {dynamicPlaceholder: false};
+HtmlField.defaultProps = {
+    dynamicPlaceholder: false,
+    setDirty: () => {},
+};
 HtmlField.props = {
     ...standardFieldProps,
     isTranslatable: { type: Boolean, optional: true },
@@ -633,6 +645,9 @@ HtmlField.extractProps = ({ attrs, field }) => {
         resizable: 'resizable' in attrs.options ? attrs.options.resizable : false,
         editorPlugins: [QWebPlugin],
     };
+    if ('collaborative' in attrs.options) {
+        wysiwygOptions.collaborative = attrs.options.collaborative;
+    }
     if ('allowCommandImage' in attrs.options) {
         // Set the option only if it is explicitly set in the view so a default
         // can be set elsewhere otherwise.
@@ -663,6 +678,10 @@ HtmlField.extractProps = ({ attrs, field }) => {
 };
 
 registry.category("fields").add("html", HtmlField, { force: true });
+
+function stripHistoryIds(value) {
+    return value && value.replace(/\sdata-last-history-steps="[^"]*?"/, '') || value;
+}
 
 // Ensure all external links are opened in a new tab.
 const retargetLinks = (container) => {

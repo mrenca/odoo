@@ -126,6 +126,8 @@ class ProductProduct(models.Model):
             domain.append(('create_date', '<=', to_date))
         groups = self.env['stock.valuation.layer']._read_group(domain, ['value:sum', 'quantity:sum'], ['product_id'])
         products = self.browse()
+        # Browse all products and compute products' quantities_dict in batch.
+        self.env['product.product'].browse([group['product_id'][0] for group in groups]).sudo(False).mapped('qty_available')
         for group in groups:
             product = self.browse(group['product_id'][0])
             value_svl = company_id.currency_id.round(group['value'])
@@ -203,8 +205,10 @@ class ProductProduct(models.Model):
         fifo_vals = self._run_fifo(abs(quantity), company)
         vals['remaining_qty'] = fifo_vals.get('remaining_qty')
         # In case of AVCO, fix rounding issue of standard price when needed.
-        if self.product_tmpl_id.cost_method == 'average':
-            rounding_error = currency.round(self.standard_price * self.quantity_svl - self.value_svl)
+        if self.product_tmpl_id.cost_method == 'average' and not float_is_zero(self.quantity_svl, precision_rounding=self.uom_id.rounding):
+            rounding_error = currency.round(
+                (self.standard_price * self.quantity_svl - self.value_svl) * abs(quantity / self.quantity_svl)
+            )
             if rounding_error:
                 # If it is bigger than the (smallest number of the currency * quantity) / 2,
                 # then it isn't a rounding error but a stock valuation error, we shouldn't fix it under the hood ...
@@ -563,7 +567,10 @@ class ProductProduct(models.Model):
             if float_is_zero(product.quantity_svl, precision_rounding=product.uom_id.rounding):
                 # FIXME: create an empty layer to track the change?
                 continue
-            svsl_vals = product._prepare_out_svl_vals(product.quantity_svl, self.env.company)
+            if float_compare(product.quantity_svl, 0, precision_rounding=product.uom_id.rounding) > 0:
+                svsl_vals = product._prepare_out_svl_vals(product.quantity_svl, self.env.company)
+            else:
+                svsl_vals = product._prepare_in_svl_vals(abs(product.quantity_svl), product.value_svl / product.quantity_svl)
             svsl_vals['description'] = description + svsl_vals.pop('rounding_adjustment', '')
             svsl_vals['company_id'] = self.env.company.id
             empty_stock_svl_list.append(svsl_vals)
@@ -574,7 +581,10 @@ class ProductProduct(models.Model):
         for product in self:
             quantity_svl = products_orig_quantity_svl[product.id]
             if quantity_svl:
-                svl_vals = product._prepare_in_svl_vals(quantity_svl, product.standard_price)
+                if float_compare(quantity_svl, 0, precision_rounding=product.uom_id.rounding) > 0:
+                    svl_vals = product._prepare_in_svl_vals(quantity_svl, product.standard_price)
+                else:
+                    svl_vals = product._prepare_out_svl_vals(abs(quantity_svl), self.env.company)
                 svl_vals['description'] = description
                 svl_vals['company_id'] = self.env.company.id
                 refill_stock_svl_list.append(svl_vals)

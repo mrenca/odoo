@@ -10,7 +10,7 @@ from odoo.tools import frozendict, formatLang, format_date, float_is_zero, Query
 from odoo.tools.sql import create_index
 from odoo.addons.web.controllers.utils import clean_action
 
-INTEGRITY_HASH_LINE_FIELDS = ('debit', 'credit', 'account_id', 'partner_id')
+from odoo.addons.account.models.account_move import MAX_HASH_VERSION
 
 
 class AccountMoveLine(models.Model):
@@ -459,11 +459,14 @@ class AccountMoveLine(models.Model):
     @api.depends('product_id', 'journal_id')
     def _compute_name(self):
         for line in self:
+            if line.display_type == 'payment_term':
+                if line.move_id.payment_reference:
+                    line.name = line.move_id.payment_reference
+                elif not line.name:
+                    line.name = ''
+                continue
             if not line.product_id or line.display_type in ('line_section', 'line_note'):
                 continue
-            # YTI : Coming from conflicting onchange from account.move
-            # for line in self.filtered(lambda line: line.account_id.user_type_id.type in ('receivable', 'payable')):
-            #     line.name = self.payment_reference or ''
             if line.partner_id.lang:
                 product = line.product_id.with_context(lang=line.partner_id.lang)
             else:
@@ -682,7 +685,7 @@ class AccountMoveLine(models.Model):
         for record in self:
             record.cumulated_balance = result[record.id]
 
-    @api.depends('debit', 'credit', 'amount_currency', 'account_id', 'currency_id', 'move_id.state', 'company_id',
+    @api.depends('debit', 'credit', 'amount_currency', 'account_id', 'currency_id', 'company_id',
                  'matched_debit_ids', 'matched_credit_ids')
     def _compute_amount_residual(self):
         """ Computes the residual amount of a move line from a reconcilable account in the company currency and the line's currency.
@@ -746,7 +749,6 @@ class AccountMoveLine(models.Model):
             line.reconciled = (
                 comp_curr.is_zero(line.amount_residual)
                 and foreign_curr.is_zero(line.amount_residual_currency)
-                and (line.matched_debit_ids or line.matched_credit_ids)
             )
 
     @api.depends('move_id.move_type', 'tax_ids', 'tax_repartition_line_id', 'debit', 'credit', 'tax_tag_ids', 'is_refund')
@@ -788,6 +790,8 @@ class AccountMoveLine(models.Model):
 
                 audit_str += separator if audit_str else ''
                 audit_str += tag_name + ': ' + formatLang(self.env, tag_amount, currency_obj=currency)
+
+            record.tax_audit = audit_str
 
     @api.depends('product_id')
     def _compute_product_uom_id(self):
@@ -1142,6 +1146,7 @@ class AccountMoveLine(models.Model):
 
     @api.onchange('account_id')
     def _inverse_account_id(self):
+        self._inverse_analytic_distribution()
         self._conditional_add_to_compute('tax_ids', lambda line: (
             line.account_id.tax_ids
             and not line.product_id.taxes_id.filtered(lambda tax: tax.company_id == line.company_id)
@@ -1410,6 +1415,17 @@ class AccountMoveLine(models.Model):
         if account_to_write and account_to_write.deprecated:
             raise UserError(_('You cannot use a deprecated account.'))
 
+        inalterable_fields = set(self._get_integrity_hash_fields()).union({'inalterable_hash', 'secure_sequence_number'})
+        hashed_moves = self.move_id.filtered('inalterable_hash')
+        violated_fields = set(vals) & inalterable_fields
+        if hashed_moves and violated_fields:
+            raise UserError(_(
+                "You cannot edit the following fields: %s.\n"
+                "The following entries are already hashed:\n%s",
+                ', '.join(f['string'] for f in self.fields_get(violated_fields).values()),
+                '\n'.join(hashed_moves.mapped('name')),
+            ))
+
         line_to_write = self
         vals = self._sanitize_vals(vals)
         for line in self:
@@ -1418,8 +1434,6 @@ class AccountMoveLine(models.Model):
                 continue
 
             if line.parent_state == 'posted':
-                if line.move_id.restrict_mode_hash_table and set(vals).intersection(INTEGRITY_HASH_LINE_FIELDS):
-                    raise UserError(_("You cannot edit the following fields due to restrict mode being activated on the journal: %s.") % ', '.join(INTEGRITY_HASH_LINE_FIELDS))
                 if any(key in vals for key in ('tax_ids', 'tax_line_id')):
                     raise UserError(_('You cannot modify the taxes related to a posted journal item, you should reset the journal entry to draft to do so.'))
 
@@ -1713,6 +1727,17 @@ class AccountMoveLine(models.Model):
             recon_debit_amount = remaining_debit_amount
             recon_credit_amount = -remaining_credit_amount
 
+        # Check if there is something left to reconcile. Move to the next loop iteration if not.
+        skip_reconciliation = False
+        if recon_currency.is_zero(recon_debit_amount):
+            res['debit_vals'] = None
+            skip_reconciliation = True
+        if recon_currency.is_zero(recon_credit_amount):
+            res['credit_vals'] = None
+            skip_reconciliation = True
+        if skip_reconciliation:
+            return res
+
         # ==== Match both lines together and compute amounts to reconcile ====
 
         # Determine which line is fully matched by the other.
@@ -1859,9 +1884,9 @@ class AccountMoveLine(models.Model):
         credit_vals['amount_residual'] = remaining_credit_amount
         credit_vals['amount_residual_currency'] = remaining_credit_amount_curr
 
-        if recon_currency.is_zero(recon_debit_amount) or debit_fully_matched:
+        if debit_fully_matched:
             res['debit_vals'] = None
-        if recon_currency.is_zero(recon_credit_amount) or credit_fully_matched:
+        if credit_fully_matched:
             res['credit_vals'] = None
         return res
 
@@ -1871,9 +1896,8 @@ class AccountMoveLine(models.Model):
         Note: The order of records in self is important because the journal items will be reconciled using this order.
         :return: a tuple of 1) list of vals for partial reconciliation creation, 2) the list of vals for the exchange difference entries to be created
         '''
-        debit_vals_list = iter([x for x in vals_list if x['balance'] > 0.0 or x['amount_currency'] > 0.0 and not x['reconciled']])
-        credit_vals_list = iter([x for x in vals_list if x['balance'] < 0.0 or x['amount_currency'] < 0.0 and not x['reconciled']])
-        void_vals_list = iter([x for x in vals_list if not x['balance'] and not x['amount_currency'] and not x['reconciled']])
+        debit_vals_list = iter([x for x in vals_list if x['balance'] > 0.0 or x['amount_currency'] > 0.0])
+        credit_vals_list = iter([x for x in vals_list if x['balance'] < 0.0 or x['amount_currency'] < 0.0])
         debit_vals = None
         credit_vals = None
 
@@ -1889,13 +1913,13 @@ class AccountMoveLine(models.Model):
 
             # Move to the next available debit line.
             if not debit_vals:
-                debit_vals = next(debit_vals_list, None) or next(void_vals_list, None)
+                debit_vals = next(debit_vals_list, None)
                 if not debit_vals:
                     break
 
             # Move to the next available credit line.
             if not credit_vals:
-                credit_vals = next(void_vals_list, None) or next(credit_vals_list, None)
+                credit_vals = next(credit_vals_list, None)
                 if not credit_vals:
                     break
 
@@ -1927,7 +1951,6 @@ class AccountMoveLine(models.Model):
                 'company': line.company_id,
                 'currency': line.currency_id,
                 'date': line.date,
-                'reconciled': line.reconciled,
             }
             for line in self
         ])
@@ -2395,11 +2418,18 @@ class AccountMoveLine(models.Model):
                         results['exchange_partials'] += exchange_diff_partials
 
             # ==== Create the full reconcile ====
-            results['full_reconcile'] = self.env['account.full.reconcile'].create({
-                'exchange_move_id': exchange_move and exchange_move.id,
-                'partial_reconcile_ids': [(6, 0, involved_partials.ids)],
-                'reconciled_line_ids': [(6, 0, involved_lines.ids)],
-            })
+            results['full_reconcile'] = self.env['account.full.reconcile'] \
+                .with_context(
+                    skip_invoice_sync=True,
+                    skip_invoice_line_sync=True,
+                    skip_account_move_synchronization=True,
+                    check_move_validity=False,
+                ) \
+                .create({
+                    'exchange_move_id': exchange_move and exchange_move.id,
+                    'partial_reconcile_ids': [Command.set(involved_partials.ids)],
+                    'reconciled_line_ids': [Command.set(involved_lines.ids)],
+                })
 
             # === Cash basis rounding autoreconciliation ===
             # In case a cash basis rounding difference line got created for the transition account, we reconcile it with the corresponding lines
@@ -2498,6 +2528,15 @@ class AccountMoveLine(models.Model):
     # -------------------------------------------------------------------------
     # MISC
     # -------------------------------------------------------------------------
+
+    def _get_integrity_hash_fields(self):
+        # Use the new hash version by default, but keep the old one for backward compatibility when generating the integrity report.
+        hash_version = self._context.get('hash_version', MAX_HASH_VERSION)
+        if hash_version == 1:
+            return ['debit', 'credit', 'account_id', 'partner_id']
+        elif hash_version == MAX_HASH_VERSION:
+            return ['name', 'debit', 'credit', 'account_id', 'partner_id']
+        raise NotImplementedError(f"hash_version={hash_version} doesn't exist")
 
     def _reconciled_lines(self):
         ids = []

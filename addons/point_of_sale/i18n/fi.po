@@ -33,6 +33,8 @@
 # Jussi Lehto, 2022
 # Jukka Paulin <jukka.paulin@gmail.com>, 2022
 # Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023
+# Konsta Aavaranta, 2023
+# Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023
 # 
 msgid ""
 msgstr ""
@@ -40,7 +42,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-02-02 10:33+0000\n"
 "PO-Revision-Date: 2022-09-22 05:53+0000\n"
-"Last-Translator: Tuomo Aura <tuomo.aura@web-veistamo.fi>, 2023\n"
+"Last-Translator: Ossi Mantylahti <ossi.mantylahti@obs-solutions.fi>, 2023\n"
 "Language-Team: Finnish (https://www.transifex.com/odoo/teams/41243/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -902,6 +904,11 @@ msgid ""
 "purchase amount, period). Rewards can be discounts (% or amount) or free "
 "products."
 msgstr ""
+"Tehosta myyntiäsi useilla erilaisilla myynninedistämisohjelmilla. Tarjolla "
+"on kuponkeja, kampanjoita, lahjakortteja, kanta-asiakasohjelmia. "
+"Erityisehtoja voidaan asettaa (tuotteet, asiakkaat, vähimmäisostosumma, "
+"ajanjakso). Palkinnot voivat olla alennuksia (% or määrä) tai ilmaisia "
+"tuotteita."
 
 #. module: point_of_sale
 #. odoo-javascript
@@ -3891,7 +3898,7 @@ msgstr "Muut"
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_pos_payment_method__outstanding_account_id
 msgid "Outstanding Account"
-msgstr ""
+msgstr "Saatavatili"
 
 #. module: point_of_sale
 #: model:ir.model.fields,field_description:point_of_sale.field_procurement_group__pos_order_id
@@ -5244,7 +5251,7 @@ msgstr "Tarkasta"
 #: code:addons/point_of_sale/static/src/xml/Screens/ReceiptScreen/OrderReceipt.xml:0
 #, python-format
 msgid "Rounding"
-msgstr ""
+msgstr "Pyöristys"
 
 #. module: point_of_sale
 #: model_terms:ir.ui.view,arch_db:point_of_sale.res_config_settings_view_form
@@ -6784,6 +6791,15 @@ msgstr "Poikkeusaktiviteetin tyyppi tietueella"
 
 #. module: point_of_sale
 #. odoo-python
+#. openerp-web
+#: code:addons/point_of_sale/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+#, python-format
+msgid ""
+"This order is not yet synced to server. Make sure it is synced then try "
+"again."
+msgstr ""
+
+#. module: point_of_sale
 #: code:addons/point_of_sale/models/pos_session.py:0
 #, python-format
 msgid ""
@@ -6940,9 +6956,10 @@ msgstr ""
 #. module: point_of_sale
 #. odoo-javascript
 #: code:addons/point_of_sale/static/src/xml/Popups/CashMoveReceipt.xml:0
-#, python-format
-msgid "VAT:"
-msgstr "ALV:"
+#: code:addons/point_of_sale/static/src/js/Screens/ReceiptScreen/ReceiptScreen.js:0
+#, python-format, python-format
+msgid "Unsynced order"
+msgstr ""
 
 #. module: point_of_sale
 #. odoo-javascript

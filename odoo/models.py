@@ -2735,6 +2735,17 @@ class BaseModel(metaclass=MetaModel):
                 for field in klass._field_definitions:
                     definitions[field.name].append(field)
         for name, fields_ in definitions.items():
+            if f'{cls._name}.{name}' in cls.pool._database_translated_fields:
+                # the field is currently translated in the database; ensure the
+                # field is translated to avoid converting its column to varchar
+                # and losing data
+                translate = next((
+                    field.args['translate'] for field in reversed(fields_) if 'translate' in field.args
+                ), False)
+                if not translate:
+                    # patch the field definition by adding an override
+                    _logger.debug("Patching %s.%s with translate=True", cls._name, name)
+                    fields_.append(fields_[0].new(translate=True))
             if len(fields_) == 1 and fields_[0]._direct and fields_[0].model_name == cls._name:
                 cls._fields[name] = fields_[0]
             else:
@@ -4191,8 +4202,14 @@ class BaseModel(metaclass=MetaModel):
             SET parent_path=concat((SELECT parent.parent_path FROM {0} parent
                                     WHERE parent.id=node.{1}), node.id, '/')
             WHERE node.id IN %s
+            RETURNING node.id, node.parent_path
         """.format(self._table, self._parent_name)
         self._cr.execute(query, [tuple(self.ids)])
+
+        # update the cache of updated nodes, and determine what to recompute
+        updated = dict(self._cr.fetchall())
+        records = self.browse(updated)
+        self.env.cache.update(records, self._fields['parent_path'], updated.values())
 
     def _parent_store_update_prepare(self, vals):
         """ Return the records in ``self`` that must update their parent_path

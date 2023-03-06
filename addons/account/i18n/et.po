@@ -26,6 +26,7 @@
 # Leaanika Randmets, 2023
 # Anna, 2023
 # Jana Jaakson, 2023
+# Birgit Vijar, 2023
 # 
 msgid ""
 msgstr ""
@@ -33,7 +34,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-02-02 10:33+0000\n"
 "PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: Jana Jaakson, 2023\n"
+"Last-Translator: Birgit Vijar, 2023\n"
 "Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -12112,8 +12113,8 @@ msgid ""
 "Selecting \"Blocking Message\" will throw an exception with the message and "
 "block the flow. The Message has to be written in the next field."
 msgstr ""
-"Valides 'Hoiatus' teavitab see kasutaja teatega, valides 'Blokeerimise "
-"teade' teavitab kasutajat ja peatab tegevuse. Teade tuleb kirjutada "
+"Valides 'Hoiatus' , saab kasutaja teavituse, valides 'Blokeerimise teade' "
+"saab kasutaja teavituse ja tegevus peatatakse. Teade tuleb kirjutada "
 "järgmisse lahtrisse."
 
 #. module: account
@@ -14384,6 +14385,14 @@ msgid "There was an error processing this page."
 msgstr "Lehe töötlemisel tekkis viga."
 
 #. module: account
+#: code:addons/account/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"There was an error when trying to add the banner to the original PDF.\n"
+"Please make sure the source file is valid."
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "These taxes are set in any new product created."
 msgstr "Need maksud määratakse iga uue tootega."
@@ -15068,7 +15077,7 @@ msgstr "Tühista märgistus \"Saadetud\""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 msgid "Unpaid"
-msgstr "Tasustamata"
+msgstr "Tasumata"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -15080,6 +15089,12 @@ msgstr "Tasumata müügiarved"
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_line_filter
 msgid "Unposted"
 msgstr "Sisestamata"
+
+#. module: account
+#: code:addons/account/models/company.py:0
+#, python-format
+msgid "Unposted Entries"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
@@ -15671,6 +15686,16 @@ msgstr "Iga-aastaselt"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_account.py:0
+#, python-format
+msgid ""
+"You cannot import the \"openning_balance\" if the opening move (%s) is "
+"already posted. If you are absolutely sure you want to modify the opening "
+"balance of your accounts, reset the move to draft."
+msgstr ""
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 #, python-format
 msgid "You are trying to reconcile some entries that are already reconciled."
@@ -15944,6 +15969,12 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/company.py:0
+#, python-format
+msgid "Please contact your accountant to print the Hash integrity result."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_account.py:0
 #, python-format
 msgid ""

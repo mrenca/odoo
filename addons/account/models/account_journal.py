@@ -107,7 +107,11 @@ class AccountJournal(models.Model):
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
 
     refund_sequence = fields.Boolean(string='Dedicated Credit Note Sequence', help="Check this box if you don't want to share the same sequence for invoices and credit notes made from this journal", default=False)
-    payment_sequence = fields.Boolean(string='Dedicated Payment Sequence', help="Check this box if you don't want to share the same sequence on payments and bank transactions posted on this journal", default='_compute_payment_sequence')
+    payment_sequence = fields.Boolean(
+        string='Dedicated Payment Sequence',
+        compute='_compute_payment_sequence', readonly=False, store=True, precompute=True,
+        help="Check this box if you don't want to share the same sequence on payments and bank transactions posted on this journal",
+    )
     sequence_override_regex = fields.Text(help="Technical field used to enforce complex sequence composition that the system would normally misunderstand.\n"\
                                           "This is a regex that can include all the following capture groups: prefix1, year, prefix2, month, prefix3, seq, suffix.\n"\
                                           "The prefix* groups are the separators between the year, month and the actual increasing sequence number (seq).\n"\
@@ -546,8 +550,8 @@ class AccountJournal(models.Model):
                     if bank_account.partner_id != company.partner_id:
                         raise UserError(_("The partners of the journal's company and the related bank account mismatch."))
             if 'restrict_mode_hash_table' in vals and not vals.get('restrict_mode_hash_table'):
-                journal_entry = self.env['account.move'].search([('journal_id', '=', self.id), ('state', '=', 'posted'), ('secure_sequence_number', '!=', 0)], limit=1)
-                if len(journal_entry) > 0:
+                journal_entry = self.env['account.move'].sudo().search([('journal_id', '=', self.id), ('state', '=', 'posted'), ('secure_sequence_number', '!=', 0)], limit=1)
+                if journal_entry:
                     field_string = self._fields['restrict_mode_hash_table'].get_description(self.env)['string']
                     raise UserError(_("You cannot modify the field %s of a journal that already has accounting entries.", field_string))
         result = super(AccountJournal, self).write(vals)

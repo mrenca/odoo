@@ -7,7 +7,7 @@
 # Norimichi Sugimoto <norimichi.sugimoto@tls-ltd.co.jp>, 2022
 # Yoshi Tashiro (Quartile) <tashiro@roomsfor.hk>, 2022
 # Martin Trigaux, 2022
-# Andy Yiu, 2022
+# Andy Yiu, 2023
 # Ryoko Tsuda <ryoko@quartile.co>, 2023
 # 
 msgid ""
@@ -227,7 +227,7 @@ msgid ""
 "A description of the Product that you want to communicate to your customers."
 " This description will be copied to every Sales Order, Delivery Order and "
 "Customer Invoice/Credit Note"
-msgstr "顧客に見せたいプロダクトの説明。この説明は販売オーダ、配送オーダ、顧客請求書/クレジットノートにコピーされます。"
+msgstr "顧客に見せたいプロダクトの説明。この説明は販売注文、配送注文、顧客請求書/クレジットノートにコピーされます。"
 
 #. module: product
 #. odoo-python
@@ -530,7 +530,7 @@ msgstr "ドア付きキャビネット"
 #: model:ir.model.fields,field_description:product.field_product_product__can_image_1024_be_zoomed
 #: model:ir.model.fields,field_description:product.field_product_template__can_image_1024_be_zoomed
 msgid "Can Image 1024 be zoomed"
-msgstr ""
+msgstr "画像1024はズームできますか"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__can_image_variant_1024_be_zoomed
@@ -667,7 +667,7 @@ msgstr "設定"
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_only_form_view
 msgid "Configure"
-msgstr "設定しましょう"
+msgstr "設定"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_label_layout_form
@@ -1013,7 +1013,7 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__create_variant__dynamic
 msgid "Dynamically"
-msgstr "販売オーダに追加後"
+msgstr "販売注文に追加後"
 
 #. module: product
 #: model:ir.model.constraint,message:product.constraint_product_template_attribute_value_attribute_value_unique
@@ -1353,7 +1353,7 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__product_attribute__create_variant__always
 msgid "Instantly"
-msgstr "プロダクトに追加後"
+msgstr "商品に追加後"
 
 #. module: product
 #: model_terms:ir.ui.view,arch_db:product.product_template_form_view
@@ -1591,7 +1591,7 @@ msgstr "最小数量"
 #. module: product
 #: model:ir.model.fields.selection,name:product.selection__res_config_settings__product_pricelist_setting__basic
 msgid "Multiple prices per product"
-msgstr "商品毎に複数価格"
+msgstr "プロダクト毎に複数価格"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_res_config_settings__product_pricelist_setting
@@ -2114,7 +2114,7 @@ msgstr ""
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_line
 msgid "Product Template Attribute Line"
-msgstr ""
+msgstr "プロダクトテンプレート属性明細"
 
 #. module: product
 #: model:ir.model,name:product.model_product_template_attribute_value
@@ -2129,7 +2129,7 @@ msgstr ""
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_label_layout__product_tmpl_ids
 msgid "Product Tmpl"
-msgstr ""
+msgstr "プロダクトテンプレート"
 
 #. module: product
 #: model:ir.model.fields,field_description:product.field_product_product__product_tooltip
@@ -2231,7 +2231,7 @@ msgstr "プロダクト: %(category)s"
 #. module: product
 #: model:ir.model.fields,field_description:product.field_res_config_settings__module_loyalty
 msgid "Promotions, Coupons, Gift Card & Loyalty Program"
-msgstr ""
+msgstr "プロモーション、クーポン、ギフトカード & ロイヤルティプログラム"
 
 #. module: product
 #: model:product.pricelist,name:product.list0
@@ -2435,7 +2435,8 @@ msgid ""
 "Specify a product category if this rule only applies to products belonging "
 "to this category or its children categories. Keep empty otherwise."
 msgstr ""
-"このカテゴリがこのカテゴリまたはその子カテゴリに属する商品にのみ適用される場合は、商品カテゴリを指定します。 それ以外の場合は空白にしておきます。"
+"このカテゴリがこのカテゴリまたはその子カテゴリに属するプロダクトにのみ適用される場合は、プロダクトカテゴリを指定します。 "
+"それ以外の場合は空白にしておきます。"
 
 #. module: product
 #: model:ir.model.fields,help:product.field_product_pricelist_item__product_id

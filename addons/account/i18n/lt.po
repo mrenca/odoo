@@ -22,7 +22,6 @@
 # Audrius Palenskis <audrius.palenskis@gmail.com>, 2022
 # Šarūnas Ažna <sarunas.azna@gmail.com>, 2022
 # grupoda2 <dmitrijus.ivanovas@gmail.com>, 2022
-# Arunas V. <arunas@devoro.com>, 2022
 # Gailius Kazlauskas, 2022
 # Naglis Jonaitis, 2022
 # Monika Raciunaite <monika.raciunaite@gmail.com>, 2022
@@ -36,6 +35,7 @@
 # Jonas Zinkevicius <jozi@odoo.com>, 2022
 # Linas Versada <linaskrisiukenas@gmail.com>, 2022
 # Mantas Kriaučiūnas Baltix <mantas@akl.lt>, 2022
+# Arunas V. <arunas@devoro.com>, 2023
 # 
 msgid ""
 msgstr ""
@@ -43,7 +43,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-02-02 10:33+0000\n"
 "PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: Mantas Kriaučiūnas Baltix <mantas@akl.lt>, 2022\n"
+"Last-Translator: Arunas V. <arunas@devoro.com>, 2023\n"
 "Language-Team: Lithuanian (https://www.transifex.com/odoo/teams/41243/lt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -9276,7 +9276,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:account.field_account_setup_bank_manual_config__activity_calendar_event_id
 #: model:ir.model.fields,field_description:account.field_res_partner_bank__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr ""
+msgstr "Kitas veiklos kalendoriaus įvykis"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__activity_date_deadline
@@ -14282,6 +14282,14 @@ msgid "There was an error processing this page."
 msgstr "Apdorojant puslapį įvyko klaida."
 
 #. module: account
+#: code:addons/account/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"There was an error when trying to add the banner to the original PDF.\n"
+"Please make sure the source file is valid."
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "These taxes are set in any new product created."
 msgstr "Šie mokesčiai nustatomi bet kuriam naujai sukurtam produktui."
@@ -14979,6 +14987,12 @@ msgid "Unposted"
 msgstr "Neužregistruota"
 
 #. module: account
+#: code:addons/account/models/company.py:0
+#, python-format
+msgid "Unposted Entries"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 msgid "Unposted Journal Entries"
 msgstr "Neužregistruoti žurnalų įrašai"
@@ -15568,6 +15582,16 @@ msgstr "Kas metus"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_account.py:0
+#, python-format
+msgid ""
+"You cannot import the \"openning_balance\" if the opening move (%s) is "
+"already posted. If you are absolutely sure you want to modify the opening "
+"balance of your accounts, reset the move to draft."
+msgstr ""
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 #, python-format
 msgid "You are trying to reconcile some entries that are already reconciled."
@@ -15844,6 +15868,12 @@ msgstr "Negalite keisti įmonės valiutos, nes jau yra žurnalo įrašų"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/company.py:0
+#, python-format
+msgid "Please contact your accountant to print the Hash integrity result."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_account.py:0
 #, python-format
 msgid ""

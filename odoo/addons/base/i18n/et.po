@@ -25,8 +25,8 @@
 # Patrick-Jordan Kiudorv, 2022
 # Martin Trigaux, 2022
 # Jana Jaakson, 2023
-# Leaanika Randmets, 2023
 # Anna, 2023
+# Leaanika Randmets, 2023
 # 
 msgid ""
 msgstr ""
@@ -34,7 +34,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-02-02 11:00+0000\n"
 "PO-Revision-Date: 2022-09-22 05:44+0000\n"
-"Last-Translator: Anna, 2023\n"
+"Last-Translator: Leaanika Randmets, 2023\n"
 "Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1888,7 +1888,7 @@ msgid ""
 "    Create customizable worksheet for Quality Control.\n"
 msgstr ""
 "\n"
-"    Looge oma kvaliteedikontrolli jaoks kohandatav tööleht.\n"
+"    Loo kvaliteedikontrolli jaoks kohandatav tööleht.\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_hr_euro
@@ -4167,6 +4167,9 @@ msgid ""
 "Create Sales order with timesheets and products from tasks\n"
 "    "
 msgstr ""
+"\n"
+"Loo müügitellimusi koos tööaja arvestuslehtede ja toodetega ülesannetelt\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_survey
@@ -10045,9 +10048,7 @@ msgstr "<strong>Telefon</strong>"
 #: model_terms:ir.ui.view,arch_db:base.identity_check_wizard
 msgid ""
 "<strong>Please enter your password to confirm you own this account</strong>"
-msgstr ""
-"<strong>Parol sisestage enda parool, et kinnitada, et olete "
-"kontoomanik.</strong>"
+msgstr "<strong>Palun sisestage enda salasõna, et jätkata</strong>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.report_irmodeloverview
@@ -18997,7 +18998,7 @@ msgstr "Aitab teil hallata oma pakkumisi, müügitellimusi ja arveldamist."
 #. module: base
 #: model:ir.module.category,description:base.module_category_services_timesheets
 msgid "Helps you manage the timesheets."
-msgstr "Aitab hallata ajatabeleid."
+msgstr "Aitab hallata tööaja arvestuslehti."
 
 #. module: base
 #: model:ir.module.category,description:base.module_category_user_type
@@ -21174,7 +21175,7 @@ msgstr "Müügivihje loomine veebisaidi külastustest"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_crm_livechat
 msgid "Lead Livechat Sessions"
-msgstr "Juhi otse-vestlusi "
+msgstr "Online-vestlus"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_social_crm
@@ -33895,7 +33896,7 @@ msgstr "E-kaubanduse rentimised ja rendivarude haldus"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_renting_wishlist
 msgid "eCommerce Rental with Wishlist"
-msgstr "E-kaubanduse rentimised ja soovide nimekiri"
+msgstr "E-kaubanduse rentimised ja soovinimekiri"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_website_sale_subscription

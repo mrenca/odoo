@@ -34,7 +34,7 @@ class StockMoveLine(models.Model):
     product_category_name = fields.Char(related="product_id.categ_id.complete_name", store=True, string="Product Category")
     reserved_qty = fields.Float(
         'Real Reserved Quantity', digits=0, copy=False,
-        compute='_compute_reserved_qty', inverse='_set_product_qty', store=True)
+        compute='_compute_reserved_qty', inverse='_set_reserved_qty', store=True)
     reserved_uom_qty = fields.Float(
         'Reserved', default=0.0, digits='Product Unit of Measure', required=True, copy=False)
     qty_done = fields.Float('Done', default=0.0, digits='Product Unit of Measure', copy=False)
@@ -315,7 +315,7 @@ class StockMoveLine(models.Model):
                     ml.move_id.picking_id.immediate_transfer and \
                     ml.move_id.state != 'done' and \
                     'qty_done' in vals:
-                ml.move_id.product_uom_qty = ml.move_id.quantity_done
+                ml.move_id.with_context(avoid_putaway_rules=True).product_uom_qty = ml.move_id.quantity_done
             if ml.state == 'done':
                 if 'qty_done' in vals:
                     ml.move_id.product_uom_qty = ml.move_id.quantity_done
@@ -567,7 +567,7 @@ class StockMoveLine(models.Model):
             raise UserError(_('You need to supply a Lot/Serial Number for product: \n - ') +
                               '\n - '.join(mls_tracked_without_lot.mapped('product_id.display_name')))
         ml_to_create_lot = self.env['stock.move.line'].browse(ml_ids_to_create_lot)
-        ml_to_create_lot.with_context(do_not_unreserve=True)._create_and_assign_production_lot()
+        ml_to_create_lot.with_context(bypass_reservation_update=True)._create_and_assign_production_lot()
 
         mls_to_delete = self.env['stock.move.line'].browse(ml_ids_to_delete)
         mls_to_delete.unlink()

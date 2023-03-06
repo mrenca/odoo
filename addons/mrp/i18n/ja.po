@@ -315,7 +315,7 @@ msgstr ""
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_kanban
 msgid "<span>Reporting</span>"
-msgstr "<span>レポーティング</span>"
+msgstr "<span>レポート作成</span>"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_kanban
@@ -807,12 +807,12 @@ msgstr "参照した部品表の部品表項目"
 #. module: mrp
 #: model:ir.model,name:mrp.model_mrp_production_backorder_line
 msgid "Backorder Confirmation Line"
-msgstr "バックオーダー確認ライン"
+msgstr "バックオーダ確認ライン"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_backorder__mrp_production_backorder_line_ids
 msgid "Backorder Confirmation Lines"
-msgstr "バックオーダー確認ライン"
+msgstr "バックオーダ確認ライン"
 
 #. module: mrp
 #. odoo-python
@@ -1452,7 +1452,7 @@ msgid ""
 "Create and confirm Manufacturing Orders these many days in advance, to have enough time to replenish components or manufacture semi-finished products.\n"
 "Note that this does not affect the MO scheduled date, which still respects the just-in-time mechanism."
 msgstr ""
-"部品の補充や半製品の製造に十分な時間を確保するために、この日数の前に製造オーダーを作成し、確認します。\n"
+"部品の補充や半製品の製造に十分な時間を確保するために、この日数の前に製造オーダを作成し、確認します。\n"
 "なお、これはMOのスケジュール日には影響せず、ジャストインタイムの仕組みが維持されます。"
 
 #. module: mrp
@@ -2143,7 +2143,7 @@ msgstr "工順作業区のリスト表示順に使われます。"
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_workcenter__sequence
 msgid "Gives the sequence order when displaying a list of work centers."
-msgstr "作業区リストを表示する時には、オーダー順を指定します。"
+msgstr "作業区リストを表示する時には、オーダ順を指定します。"
 
 #. module: mrp
 #: model:ir.model.fields,help:mrp.field_mrp_bom_line__sequence
@@ -3412,7 +3412,7 @@ msgstr ""
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__orderpoint_id
 msgid "Orderpoint"
-msgstr "オーダーポイント"
+msgstr "オーダポイント"
 
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__order_ids
@@ -4125,7 +4125,7 @@ msgstr "再計画"
 #. module: mrp
 #: model:ir.ui.menu,name:mrp.menu_mrp_reporting
 msgid "Reporting"
-msgstr "レポーティング"
+msgstr "レポート作成"
 
 #. module: mrp
 #. odoo-javascript
@@ -4945,7 +4945,7 @@ msgstr "作業オーダは既に処理されているはずです"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_document__theme_template_id
 msgid "Theme Template"
-msgstr ""
+msgstr "テーマテンプレート"
 
 #. module: mrp
 #. odoo-python
@@ -5105,7 +5105,7 @@ msgstr "終了日"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_production_backorder_line__to_backorder
 msgid "To Backorder"
-msgstr "バックオーダーするには"
+msgstr "バックオーダするには"
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_production__state__to_close
@@ -5182,7 +5182,7 @@ msgstr "合計数量"
 #. module: mrp
 #: model:ir.model.fields,field_description:mrp.field_mrp_workcenter__workorder_progress_count
 msgid "Total Running Orders"
-msgstr "合計仕掛中オーダー"
+msgstr "合計仕掛中オーダ"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.view_stock_move_operations_raw
@@ -5512,7 +5512,7 @@ msgstr "入荷待ち"
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_workorder__state__pending
 msgid "Waiting for another WO"
-msgstr "他の作業オーダ待ち"
+msgstr "他の作業注文待ち"
 
 #. module: mrp
 #: model:ir.model.fields.selection,name:mrp.selection__mrp_workorder__state__waiting

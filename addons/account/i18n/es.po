@@ -12,13 +12,13 @@
 # Daniel Salazar, 2022
 # Leonardo J. Caballero G. <leonardocaballero@gmail.com>, 2022
 # Cristian Cruz, 2022
-# Farouk Jabiri, 2022
+# jabiri7, 2022
 # Mariana Torres <mt@adhoc.com.ar>, 2022
-# Camille Dantinne <cmd@odoo.com>, 2022
 # Víctor Martínez <victor.martinez@tecnativa.com>, 2022
 # David Ramia, 2023
 # Jose Alejandro Echeverri Valencia <josealejandroeche@gmail.com>, 2023
 # Óscar Fonseca <tecnico@extreme-micro.com>, 2023
+# Camille Dantinne <cmd@odoo.com>, 2023
 # Pedro M. Baeza <pedro.baeza@tecnativa.com>, 2023
 # 
 msgid ""
@@ -470,9 +470,9 @@ msgid ""
 "</div>\n"
 "            "
 msgstr ""
-"factura<div style=\"margin: 0px; padding: 0px;\">\n"
+"<div style=\"margin: 0px; padding: 0px;\">\n"
 "    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"        Estimado\n"
+"        Estimado/a\n"
 "        <t t-if=\"object.partner_id.parent_id\">\n"
 "            <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t> (<t t-out=\"object.partner_id.parent_id.name or ''\">Azure Interior</t>),\n"
 "        </t>\n"
@@ -480,9 +480,9 @@ msgstr ""
 "            <t t-out=\"object.partner_id.name or ''\">Brandon Freeman</t>,\n"
 "        </t>\n"
 "        <br/><br/>\n"
-"        Aquí está su\n"
+"        Adjunta encontrará su\n"
 "        <t t-if=\"object.name\">\n"
-"            factura<span style=\"font-weight:bold;\" t-out=\"object.name or ''\">INV/2021/05/0005</span>\n"
+"            factura <span style=\"font-weight:bold;\" t-out=\"object.name or ''\">INV/2021/05/0005</span>\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
 "            factura\n"
@@ -491,15 +491,15 @@ msgstr ""
 "            (con referencia: <t t-out=\"object.invoice_origin or ''\">SUB003</t>)\n"
 "        </t>\n"
 "        por un importe total de <span style=\"font-weight:bold;\" t-out=\"format_amount(object.amount_total, object.currency_id) or ''\">$ 143,750.00</span>\n"
-"        from <t t-out=\"object.company_id.name or ''\">SuEmpresa</t>.\n"
+"        de <t t-out=\"object.company_id.name or ''\">SuEmpresa</t>.\n"
 "        <t t-if=\"object.payment_state in ('paid', 'in_payment')\">\n"
-"            Esta factura ya está pagada.\n"
+"            Esta factura ya se encuentra pagada.\n"
 "        </t>\n"
 "        <t t-else=\"\">\n"
-"            Por favor, remita el pago con la mayor brevedad.\n"
+"            Por favor, remita el pago con la mayor brevedad posible.\n"
 "            <t t-if=\"object.payment_reference\">\n"
 "                <br/><br/>\n"
-"                Utilice la siguiente comunicación para su pago: <span style=\"font-weight:bold;\" t-out=\"object.payment_reference or ''\">INV/2021/05/0005</span>.\n"
+"                Utilice la siguiente referencia para su ingreso: <span style=\"font-weight:bold;\" t-out=\"object.payment_reference or ''\">INV/2021/05/0005</span>.\n"
 "            </t>\n"
 "        </t>\n"
 "        <br/><br/>\n"
@@ -2096,7 +2096,7 @@ msgstr "Activar para crear un recibo de venta"
 #: model:ir.model.fields,field_description:account.field_res_partner_bank__active
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
 msgid "Active"
-msgstr "Activar"
+msgstr "Activo"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_search
@@ -4138,7 +4138,7 @@ msgstr "Tipo de comunicación"
 #. module: account
 #: model:ir.model,name:account.model_res_company
 msgid "Companies"
-msgstr "Empresas"
+msgstr "Compañías"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_res_partner__ref_company_ids
@@ -4181,7 +4181,7 @@ msgstr "Empresas que se refieren al partner"
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
 #: model_terms:ir.ui.view,arch_db:account.view_account_tax_search
 msgid "Company"
-msgstr "Empresa"
+msgstr "Compañía"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_form
@@ -4191,7 +4191,7 @@ msgstr "Cuenta bancaria de la empresa"
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_fiscal_position__company_country_id
 msgid "Company Country"
-msgstr "País de la empresa"
+msgstr "País de la compañía"
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_accrued_orders_wizard__currency_id
@@ -14891,6 +14891,14 @@ msgid "There was an error processing this page."
 msgstr "Hubo un error al procesar esta página."
 
 #. module: account
+#: code:addons/account/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"There was an error when trying to add the banner to the original PDF.\n"
+"Please make sure the source file is valid."
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.res_config_settings_view_form
 msgid "These taxes are set in any new product created."
 msgstr "Estos impuestos se establecen en cualquier producto nuevo creado."
@@ -15613,6 +15621,12 @@ msgid "Unposted"
 msgstr "Sin asentar"
 
 #. module: account
+#: code:addons/account/models/company.py:0
+#, python-format
+msgid "Unposted Entries"
+msgstr "Asientos sin publicar"
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_move_filter
 msgid "Unposted Journal Entries"
 msgstr "Asientos no validados"
@@ -16227,6 +16241,16 @@ msgstr "Anualmente"
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/account_account.py:0
+#, python-format
+msgid ""
+"You cannot import the \"openning_balance\" if the opening move (%s) is "
+"already posted. If you are absolutely sure you want to modify the opening "
+"balance of your accounts, reset the move to draft."
+msgstr ""
+
+#. module: account
+#. odoo-python
 #: code:addons/account/models/account_move_line.py:0
 #, python-format
 msgid "You are trying to reconcile some entries that are already reconciled."
@@ -16546,6 +16570,14 @@ msgstr ""
 
 #. module: account
 #. odoo-python
+#: code:addons/account/models/company.py:0
+#, python-format
+msgid "Please contact your accountant to print the Hash integrity result."
+msgstr ""
+"Contacte con su contable para imprimir el resultado de la integridad de "
+"hash."
+
+#. module: account
 #: code:addons/account/models/account_account.py:0
 #, python-format
 msgid ""

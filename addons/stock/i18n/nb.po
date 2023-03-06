@@ -12,6 +12,7 @@
 # Lars Aam <lars.aam@vikenfiber.no>, 2022
 # Joar Horvei, 2022
 # Thor Arne Hvidsten, 2022
+# Lars Petter Lilleng, 2023
 # Henning Fyllingsnes, 2023
 # 
 msgid ""
@@ -4734,7 +4735,7 @@ msgstr "Ny overføring"
 #: model:ir.model.fields,field_description:stock.field_stock_lot__activity_calendar_event_id
 #: model:ir.model.fields,field_description:stock.field_stock_picking__activity_calendar_event_id
 msgid "Next Activity Calendar Event"
-msgstr "Neste aktivitets hendelse"
+msgstr "Neste kalender aktivitet"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_lot__activity_date_deadline
@@ -5565,7 +5566,7 @@ msgstr ""
 #. module: stock
 #: model:ir.model,name:stock.model_stock_picking_type
 msgid "Picking Type"
-msgstr ""
+msgstr "Plukktype"
 
 #. module: stock
 #: model:ir.model.fields,field_description:stock.field_stock_rule__picking_type_code_domain

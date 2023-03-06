@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Martin Trigaux, 2022
+# Andy Yiu, 2023
 # Ryoko Tsuda <ryoko@quartile.co>, 2023
 # 
 msgid ""
@@ -69,12 +70,12 @@ msgstr "1つ追加"
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
 msgid "Add to cart"
-msgstr "カートに追加"
+msgstr "カートに入れる"
 
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_form_quote
 msgid "Add to order lines"
-msgstr "オーダー項目に追加"
+msgstr "オーダ項目に追加"
 
 #. module: sale_management
 #: model:ir.model.fields,field_description:sale_management.field_digest_digest__kpi_all_sale_total
@@ -437,7 +438,7 @@ msgstr "削除"
 #. module: sale_management
 #: model_terms:ir.ui.view,arch_db:sale_management.sale_order_portal_content_inherit_sale_management
 msgid "Remove one"
-msgstr ""
+msgstr "一つを削除"
 
 #. module: sale_management
 #: model:ir.model.fields,help:sale_management.field_sale_order_template__require_signature
