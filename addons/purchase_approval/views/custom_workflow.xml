@@ -27,12 +27,13 @@
                 <page name="approvals" string="Aprobaciones">
                     <field name="workflow_approval"
                         widget="section_and_note_one2many"
-                        context="{'default_state': 'draft'}"
                         attrs="{'readonly': True}">
                         <tree string="Aprobaciones">
                             <field name="step_name" />
-                            <field name="approved" />
-                            <field name="completed" />
+                            <field name="can_approve" />
+                            <button name="button_approve" string="Aprobar"  type="object" icon="fa-check" attrs="{'invisible': [('can_approve', '=', False)]}" />
+                            <button name="button_reject" string="Rechazar" type="object" icon="fa-times" attrs="{'invisible': [('can_approve', '=', False)]}" />
+                            <field name="state" />
                             <field name="write_uid"/>
                             <field name="write_date"/>
                         </tree>

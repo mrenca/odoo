@@ -4,3 +4,4 @@ access_custom_workflow,custom.workflow,model_custom_workflow,purchase.group_purc
 access_custom_workflow_step,custom.workflow.step,model_custom_workflow_step,purchase.group_purchase_manager,1,1,1,1
 access_custom_workflow_step,custom.workflow.step,model_custom_workflow_step,purchase.group_purchase_user,1,0,0,0
 access_custom_workflow_approval,custom.workflow.approval,model_custom_workflow_approval,purchase.group_purchase_user,1,1,1,1
+access_ir_model,ir.model,base.model_ir_model,purchase.group_purchase_user,1,0,0,0
