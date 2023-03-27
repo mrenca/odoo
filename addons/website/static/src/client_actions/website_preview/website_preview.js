@@ -145,7 +145,7 @@ export class WebsitePreview extends Component {
             // content of the previous URL before reaching the client action,
             // which was lost after being replaced for the frontend's URL.
             const handleBackNavigation = () => {
-                if (!window.location.pathname.startsWith('/@')) {
+                if (window.location.pathname === '/web') {
                     window.dispatchEvent(new HashChangeEvent('hashchange', {
                         newURL: window.location.href.toString()
                     }));
@@ -301,11 +301,9 @@ export class WebsitePreview extends Component {
         if (!this.backendUrl) {
             this.backendUrl = routeToUrl(this.router.current);
         }
-        const currentUrl = new URL(this.iframe.el.contentDocument.location.href);
-        currentUrl.pathname = `/@${currentUrl.pathname}`;
-        this.currentTitle = this.iframe.el.contentDocument.title;
-        history.replaceState({}, this.currentTitle, currentUrl.href);
-        this.title.setParts({ action: this.currentTitle });
+        const currentTitle = this.iframe.el.contentDocument.title;
+        history.replaceState({}, currentTitle, this.iframe.el.contentDocument.location.href);
+        this.title.setParts({ action: currentTitle });
     }
 
     _onPageLoaded() {
@@ -340,6 +338,14 @@ export class WebsitePreview extends Component {
                 // Forward clicks to close backend client action's navbar
                 // dropdowns.
                 this.iframe.el.dispatchEvent(new MouseEvent('click', ev));
+            } else {
+                // When in edit mode, prevent the default behaviours of clicks
+                // as to avoid DOM changes not handled by the editor.
+                // (Such as clicking on a link that triggers navigating to
+                // another page.)
+                if (!ev.target.closest('#oe_manipulators')) {
+                    ev.preventDefault();
+                }
             }
 
             const linkEl = ev.target.closest('[href]');

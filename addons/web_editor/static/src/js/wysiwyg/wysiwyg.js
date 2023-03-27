@@ -205,7 +205,10 @@ const Wysiwyg = Widget.extend({
             },
             filterMutationRecords: (records) => {
                 return records.filter((record) => {
-                    return !(record.target.classList && record.target.classList.contains('o_header_standard'));
+                    return !(
+                        (record.target.classList && record.target.classList.contains('o_header_standard')) ||
+                        (record.type === 'attributes' && record.attributeName === 'data-last-history-steps')
+                    );
                 });
             },
             preHistoryUndo: () => {
@@ -283,7 +286,7 @@ const Wysiwyg = Widget.extend({
                     }
                     if ($field.data('oe-type') === "image") {
                         $field.attr('contenteditable', false);
-                        $field.find('img').attr('contenteditable', true);
+                        $field.find('img').attr('contenteditable', $field.data('oe-readonly') !== 1);
                     }
                     if ($field.is('[data-oe-many2one-id]')) {
                         $field.attr('contenteditable', false);
@@ -365,6 +368,9 @@ const Wysiwyg = Widget.extend({
                     && !$target.find('> [data-oe-model]').length
                     && !$target[0].closest('.o_extra_menu_items')
                     && $target[0].isContentEditable) {
+                if (ev.ctrlKey || ev.metaKey) {
+                    window.open(ev.target.href, '_blank')
+                }
                 this.linkPopover = $target.data('popover-widget-initialized');
                 if (!this.linkPopover) {
                     // TODO this code is ugly maybe the mutex should be in the
@@ -454,7 +460,7 @@ const Wysiwyg = Widget.extend({
         // Check wether clientA is before clientB.
         const isClientFirst = (clientA, clientB) => {
             if (clientA.startTime === clientB.startTime) {
-                return clientA.id.localCompare(clientB.id) === -1;
+                return clientA.id.localeCompare(clientB.id) < 1;
             } else {
                 return clientA.startTime < clientB.startTime;
             }
@@ -465,6 +471,7 @@ const Wysiwyg = Widget.extend({
             // Wether or not the history has been sent or received at least once.
             let historySyncAtLeastOnce = false;
             let historySyncFinished = false;
+            let historyStepsBuffer = [];
 
             return new PeerToPeer({
                 peerConnectionConfig: { iceServers: this._iceServers },
@@ -553,6 +560,11 @@ const Wysiwyg = Widget.extend({
                                         this.odooEditor.onExternalMultiselectionUpdate(remoteSelection);
                                     }
                                 }
+                                // In case there are steps received in the meantime, process them.
+                                if (historyStepsBuffer.length) {
+                                    this.odooEditor.onExternalHistorySteps(historyStepsBuffer);
+                                    historyStepsBuffer = [];
+                                }
                                 historySyncFinished = true;
                             } else {
                                 const remoteSelection = await this.ptp.requestClient(fromClientId, 'get_collaborative_selection', undefined, { transport: 'rtc' });
@@ -567,6 +579,8 @@ const Wysiwyg = Widget.extend({
                             // before the history has synced at least once.
                             if (historySyncFinished) {
                                 this.odooEditor.onExternalHistorySteps([notificationPayload]);
+                            } else {
+                                historyStepsBuffer.push(notificationPayload);
                             }
                             break;
                         case 'oe_history_set_selection': {
@@ -662,8 +676,10 @@ const Wysiwyg = Widget.extend({
                     },
                     { transport: 'rtc' }
                 );
+                // If missing steps === -1, it means that either the
+                // step.clientId has a stale document or the step.clientId has a
+                // snapshot and does not includes the step in its history.
                 if (missingSteps === -1 || !missingSteps.length) {
-                    // This case should never happen.
                     console.warn('Editor get_missing_steps result is erroneous.');
                     return;
                 }
@@ -1051,6 +1067,10 @@ const Wysiwyg = Widget.extend({
                         return;
                     }
                     let $node = $(field);
+                    // Do not forward "unstyled" copies to other nodes.
+                    if ($node.hasClass('o_translation_without_style')) {
+                        return;
+                    }
                     let $nodes = $odooFields.filter(function () {
                         return this !== field;
                     });
@@ -1103,6 +1123,16 @@ const Wysiwyg = Widget.extend({
                     }
                     const html = $node.html();
                     for (const node of $nodes) {
+                        if (node.classList.contains('o_translation_without_style')) {
+                            // For generated elements such as the navigation
+                            // labels of website's table of content, only the
+                            // text of the referenced translation must be used.
+                            const text = $node.text();
+                            if (node.innerText !== text) {
+                                node.innerText = text;
+                            }
+                            continue;
+                        }
                         if (node.innerHTML !== html) {
                             node.innerHTML = html;
                         }
@@ -1472,7 +1502,7 @@ const Wysiwyg = Widget.extend({
                     break;
             }
         };
-        if (!this.options.snippets) {
+        if (!options.snippets) {
             $toolbar.find('#justify, #table, #media-insert').remove();
         }
         $toolbar.find('#media-insert, #media-replace, #media-description').click(openTools);
@@ -1721,14 +1751,14 @@ const Wysiwyg = Widget.extend({
         }
         const coloredElements = this.odooEditor.execCommand('applyColor', color, eventName === 'foreColor' ? 'color' : 'backgroundColor', this.lastMediaClicked);
 
-        const coloredTds = coloredElements.filter(coloredElement => coloredElement.classList.contains('o_selected_td'));
+        const coloredTds = coloredElements && coloredElements.length && coloredElements.filter(coloredElement => coloredElement.classList.contains('o_selected_td'));
         if (coloredTds.length) {
             const propName = eventName === 'foreColor' ? 'color' : 'background-color';
             for (const td of coloredTds) {
                 // Make it important so it has priority over selection color.
                 td.style.setProperty(propName, td.style[propName], previewMode ? 'important' : '');
             }
-        } else if (!this.lastMediaClicked) {
+        } else if (!this.lastMediaClicked && coloredElements && coloredElements.length) {
             // Ensure the selection in the fonts tags, otherwise an undetermined
             // race condition could generate a wrong selection later.
             const first = coloredElements[0];
@@ -1830,7 +1860,7 @@ const Wysiwyg = Widget.extend({
         ].join(',')).toggleClass('d-none', !isInMedia);
         // The image replace button is in the image options when the sidebar
         // exists.
-        if (this.snippetsMenu && $target.is('img')) {
+        if (this.snippetsMenu && !this.snippetsMenu.folded && $target.is('img')) {
             this.toolbar.$el.find('#media-replace').toggleClass('d-none', true);
         }
         // Only show the image-transform, image-crop and media-description
@@ -1880,7 +1910,7 @@ const Wysiwyg = Widget.extend({
             // Always hide the unlink button on media.
             this.toolbar.$el.find('#unlink').toggleClass('d-none', true);
             // Show the floatingtoolbar on the topleft of the media.
-            if (this.options.autohideToolbar) {
+            if (this.odooEditor.autohideToolbar && !this.odooEditor.isMobile) {
                 const imagePosition = this.lastMediaClicked.getBoundingClientRect();
                 this.toolbar.$el.css({
                     visibility: 'visible',
@@ -2410,7 +2440,7 @@ const Wysiwyg = Widget.extend({
         }
     },
     _onSelectionChange() {
-        if (this.options.autohideToolbar) {
+        if (this.odooEditor.autohideToolbar) {
             const isVisible = this.linkPopover && this.linkPopover.el.offsetParent;
             if (isVisible && !this.odooEditor.document.getSelection().isCollapsed) {
                 this.linkPopover.hide();
@@ -2422,7 +2452,7 @@ const Wysiwyg = Widget.extend({
             this.$editable.find('.o_editable_date_field_linked').removeClass('o_editable_date_field_linked');
         }
         const closestDialog = e.target.closest('.o_dialog, .o_web_editor_dialog');
-        if (e.target.closest('.oe-toolbar') || (closestDialog && closestDialog.querySelector('.o_select_media_dialog, .o_link_dialog'))) {
+        if (e.target.closest('.oe-toolbar') || e.target.closest('.o_we_crop_buttons') || (closestDialog && closestDialog.querySelector('.o_select_media_dialog, .o_link_dialog'))) {
             this._shouldDelayBlur = true;
         } else {
             if (this._pendingBlur && !e.target.closest('.o_wysiwyg_wrapper')) {

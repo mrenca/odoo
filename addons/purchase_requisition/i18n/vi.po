@@ -271,12 +271,12 @@ msgstr "Công ty"
 #: code:addons/purchase_requisition/models/purchase.py:0
 #, python-format
 msgid "Compare Order Lines"
-msgstr "So sánh các dòng đơn hàng"
+msgstr "So sánh chi tiết đơn hàng"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
 msgid "Compare Product Lines"
-msgstr "So sánh các dòng sản phẩm"
+msgstr "So sánh chi tiết sản phẩm"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_form
@@ -319,7 +319,7 @@ msgid ""
 msgstr ""
 "Tạo một thông báo mời thầu bằng cách thêm yêu cầu báo giá dự trù cho các nhà cung cấp khác nhau.\n"
 "                            Sau đó chọn nhà cung cấp có sự hội tụ tốt nhất giữa thời gian giao hàng, tỷ lệ giao hàng đúng hạn và/hoặc tổng tiền.\n"
-"                            Bằng cách so sánh các dòng sản phẩm, bạn cũng có thể quyết định đặt mua một số sản phẩm từ nhà cung cấp này và những sản phẩm khác từ nhà cung cấp khác."
+"                            Bằng cách so sánh chi tiết sản phẩm, bạn cũng có thể quyết định đặt mua một số sản phẩm từ nhà cung cấp này và những sản phẩm khác từ nhà cung cấp khác."
 
 #. module: purchase_requisition
 #. odoo-python
@@ -391,7 +391,7 @@ msgstr "Tên hiển thị"
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition_type__line_copy__none
 msgid "Do not create RfQ lines automatically"
-msgstr "Không tự động tạo dòng YCBG"
+msgstr "Không tự động tạo chi tiết YCBG"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.view_purchase_requisition_filter
@@ -558,7 +558,7 @@ msgstr "Hoạt động trễ"
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition_type__line_copy
 msgid "Lines"
-msgstr "Dòng"
+msgstr "Chi tiết"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_form_inherit
@@ -758,12 +758,12 @@ msgstr "Đơn mua hàng"
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_order_line
 msgid "Purchase Order Line"
-msgstr "Dòng đơn mua hàng"
+msgstr "Mục đơn mua hàng"
 
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.purchase_order_line_compare_tree
 msgid "Purchase Order Lines"
-msgstr "Dòng đơn mua hàng"
+msgstr "Mục đơn mua hàng"
 
 #. module: purchase_requisition
 #: model:ir.model.fields,field_description:purchase_requisition.field_purchase_requisition__purchase_ids
@@ -790,7 +790,7 @@ msgstr "Yêu cầu mua hàng"
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_line
 #: model:ir.model.fields,field_description:purchase_requisition.field_product_supplierinfo__purchase_requisition_line_id
 msgid "Purchase Requisition Line"
-msgstr "Dòng yêu cầu mua hàng"
+msgstr "Mục yêu cầu mua hàng"
 
 #. module: purchase_requisition
 #: model:ir.model,name:purchase_requisition.model_purchase_requisition_type
@@ -826,7 +826,7 @@ msgstr "Mã"
 #. module: purchase_requisition
 #: model_terms:ir.ui.view,arch_db:purchase_requisition.report_purchaserequisitions
 msgid "Reference:"
-msgstr "Mã:"
+msgstr "Mã tham chiếu:"
 
 #. module: purchase_requisition
 #: model:ir.actions.act_window,name:purchase_requisition.action_purchase_requisition_to_so
@@ -1067,7 +1067,7 @@ msgstr "Đơn vị tính"
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition_type__line_copy__copy
 msgid "Use lines of agreement"
-msgstr "Dùng dòng hợp đồng"
+msgstr "Dùng chi tiết hợp đồng"
 
 #. module: purchase_requisition
 #: model:ir.model.fields.selection,name:purchase_requisition.selection__purchase_requisition_type__quantity_copy__copy
@@ -1154,7 +1154,7 @@ msgstr "Công cụ dùng để đặt trước giá trị cho đơn mua hàng d�
 #: code:addons/purchase_requisition/models/purchase_requisition.py:0
 #, python-format
 msgid "You can only delete draft or cancelled requisitions."
-msgstr "Bạn chỉ có thể xoá bản nháp hoặc huỷ yêu cầu."
+msgstr "Bạn chỉ có thể xoá yêu cầu nháp hoặc đã huỷ."
 
 #. module: purchase_requisition
 #. odoo-python

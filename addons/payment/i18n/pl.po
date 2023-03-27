@@ -27,6 +27,7 @@
 # Paweł Wodyński <pw@myodoo.pl>, 2022
 # Martin Trigaux, 2022
 # Anita Kosobucka, 2023
+# danielkowalczyk007, 2023
 # Tadeusz Karpiński <tadeuszkarpinski@gmail.com>, 2023
 # 
 msgid ""
@@ -121,6 +122,8 @@ msgid ""
 "<strong>No suitable payment option could be found.</strong><br/>\n"
 "                                If you believe that it is an error, please contact the website administrator."
 msgstr ""
+"<strong>Nie udało się znaleźć odpowiedniej opcji płatności</strong>\n"
+"Jeśli uważasz, że to błąd, skontaktuj się z administratorem strony."
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_methods
@@ -867,6 +870,8 @@ msgid ""
 "In test mode, a fake payment is processed through a test payment interface.\n"
 "This mode is advised when setting up the provider."
 msgstr ""
+"W trybie testowym przez testowy interfejs płatniczy przetwarzane są fałszywe płatności.\n"
+"Ten tryb jest zalecany podczas konfigurowania dostawcy."
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider__inline_form_view_id
@@ -1460,7 +1465,7 @@ msgstr "Korekty"
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_transaction__refunds_count
 msgid "Refunds Count"
-msgstr ""
+msgstr "Liczba zwrotów"
 
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_link_wizard__res_id
@@ -1891,7 +1896,7 @@ msgstr ""
 #. module: payment
 #: model:ir.model.fields,field_description:payment.field_payment_provider__support_refund
 msgid "Type of Refund Supported"
-msgstr ""
+msgstr "Typ wspieranego zwrotu"
 
 #. module: payment
 #. odoo-javascript
@@ -1943,7 +1948,7 @@ msgstr ""
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.payment_transaction_form
 msgid "Void Transaction"
-msgstr ""
+msgstr "Pusta transakcja"
 
 #. module: payment
 #. odoo-javascript
@@ -2131,7 +2136,7 @@ msgstr "Twoja płatność została autoryzowana."
 #: model_terms:payment.provider,cancel_msg:payment.payment_provider_transfer
 #, python-format
 msgid "Your payment has been cancelled."
-msgstr ""
+msgstr "Twoja płatność została anulowana"
 
 #. module: payment
 #. odoo-javascript
@@ -2161,6 +2166,7 @@ msgstr ""
 msgid ""
 "Your payment has been successfully processed but is waiting for approval."
 msgstr ""
+"Twoja płatność została pomyślnie przetworzona, ale czeka na zatwierdzenie."
 
 #. module: payment
 #. odoo-python
@@ -2182,7 +2188,7 @@ msgstr ""
 #: model_terms:payment.provider,done_msg:payment.payment_provider_transfer
 #, python-format
 msgid "Your payment has been successfully processed. Thank you!"
-msgstr ""
+msgstr "Twoja płatność została pomyślnie zrealizowana. Dziękujemy!"
 
 #. module: payment
 #: model_terms:ir.ui.view,arch_db:payment.transaction_status
@@ -2255,3 +2261,5 @@ msgid ""
 "You must first deactivate a payment provider before deleting its journal.\n"
 "Linked providers: %s"
 msgstr ""
+"Musisz najpierw dezaktywować dostawcę płatności przed usunięciem jego dziennika.\n"
+"Połączeni dostawcy: %s"
