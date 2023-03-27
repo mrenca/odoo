@@ -21,7 +21,8 @@
             </button> -->
             <field name="partner_id" position="before">
                 <field name="user_department" string="Solicitante"/>
-                <field name="department_manager" string="Manager"/>
+                <field name="analytic_account_id" string="Cuenta Analítica" options="{'no_create': True, 'no_create_edit': True}"/>
+                <!-- <field name="department_manager" string="Manager"/> -->
             </field>
             <xpath expr="//page[@name='products']" position="after">
                 <page name="approvals" string="Aprobaciones">

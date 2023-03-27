@@ -99,6 +99,7 @@ class PurchaseOrder(models.Model):
     user_department = fields.Many2one(related='user_id.employee_id.department_id', readonly=True)
     department_manager = fields.Many2one(related='user_department.manager_id', readonly=True)
     workflow_approval = fields.One2many('custom.workflow.approval', 'order_id', string='Aprobaciones', states={'cancel': [('readonly', True)], 'done': [('readonly', True)]})
+    analytic_account_id = fields.Many2one('account.analytic.account', string='Analytic Account', index=True, ondelete='set null')
 
     @api.constrains('state')
     def _check_state(self):
