@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="purchase_report_inherit"
+             inherit_id="purchase.report_purchaseorder_document">
+       <xpath expr="//div[@id='total']" position="after">
+           <div id="signature" class="row mt32 align-items-end" style="padding-top: 80px;">
+                <t t-foreach="o.workflow_approval" t-as="approval">
+                    <t t-if="approval.state == 'approved'">
+                        <div class="col-3">
+                            <table class="table table-sm">
+                                <div t-if="approval.user_ids.digital_sign"
+                                    name="signature">
+                                    <img t-att-src="image_data_uri(approval.user_ids.digital_sign)"
+                                        style="max-height: 4cm; max-width: 8cm;
+                                        padding-top: 50px;"/>
+                                </div>
+                                <div t-if="not approval.user_ids.digital_sign"
+                                    name="signature">
+                                    <img src="data:null"
+                                        style="padding-top: 4cm;"/>
+                                </div>
+                                <tr>
+                                    <td class="text-right" style="border-bottom: none!important">
+                                        Firmado por: <b t-field="approval.write_uid"/>
+                                        <br />
+                                        Fecha: <b t-field="approval.write_date"/>
+                                        <div t-if="approval.signature">
+                                            <field name="signature" />
+                                        </div> 
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </t>
+                </t>
+           </div>
+        </xpath>
+   </template>
+</odoo>

@@ -15,5 +15,6 @@
     'data': [
         'security/ir.model.access.csv',
         'views/custom_workflow.xml',
+        'views/purchase_report_inherit.xml',
     ]
 }

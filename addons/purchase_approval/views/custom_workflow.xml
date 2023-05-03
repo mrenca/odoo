@@ -1,5 +1,18 @@
 <?xml version="1.0"?>
 <odoo>
+    <record id="res_users_form_inherit" model="ir.ui.view">
+        <field name="name">res.users.form.inherit</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <group name="messaging" position="after">
+                <group name="purchase_signature" string="Firma digital">
+                    <field name="digital_sign" widget="signature_stu"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
     <record id="purchase_order_view_tree_inherit" model="ir.ui.view">
         <field name="name">purchase.order.view.tree.inherit</field>
         <field name="model">purchase.order</field>
@@ -55,6 +68,7 @@
                         <field name="sequence" string="Secuencia" />
                         <field name="workflow_id" string="Flujo" />
                         <field name="manager_approval" string="Aprobación de director de área" />
+                        <field name="sign_required" string="Requiere firma digital" />
                         <field name="user_ids" string="Usuarios" widget="many2many_tags" />
                     </group>
                 </sheet>

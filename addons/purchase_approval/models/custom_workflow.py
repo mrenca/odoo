@@ -16,6 +16,7 @@ class CustomWorkflowStep(models.Model):
     sequence = fields.Integer(string='Sequence')
     user_ids = fields.Many2many('res.users', string='Users')
     manager_approval = fields.Boolean(string='Manager Approval', default = False)
+    sign_required = fields.Boolean(string='Firma Requerida', default = False)
     workflow_id = fields.Many2one('custom.workflow', string='Workflow', index=True, required=True, ondelete='cascade')
 
 class CustomWorkflowApproval(models.Model):
@@ -29,6 +30,7 @@ class CustomWorkflowApproval(models.Model):
     user_ids = fields.Many2many(related='step_id.user_ids', readonly=True)
     can_approve = fields.Boolean(compute="_compute_can_approve")
     manager_approval = fields.Boolean(related='step_id.manager_approval', readonly=True)
+    sign_required = fields.Boolean(related='step_id.sign_required', readonly=True)
     state = fields.Selection([
         ('new', 'Nueva'),
         ('pending', 'Pendiente'),
@@ -61,6 +63,66 @@ class CustomWorkflowApproval(models.Model):
                 order = 'sequence ASC'
             )
 
+            if self.sign_required:
+                # Obtener la firmagob
+                from datetime import datetime, date, timedelta
+                import pytz
+                import requests
+                import hashlib
+                import jwt
+                import base64
+
+                try:
+                    sclTz = pytz.timezone("America/Santiago")
+                    now = datetime.now(sclTz)
+                    now_plus_10 = now + timedelta(minutes=10)
+                    pdf = self.env['ir.actions.report']._render_qweb_pdf('purchase.action_report_purchase_order', res_ids=[self.order_id.id])
+                    b64_pdf = base64.b64encode(pdf[0])
+
+                    token_data = {
+                        "entity": "Subsecretaría General de la Presidencia",
+                        "run": "22222222",
+                        "expiration": now_plus_10.strftime('%Y-%m-%dT%H:%M:%S'),
+                        "purpose": "Desatendido"
+                    }
+                    secret = "27a216342c744f89b7b82fa290519ba0"
+
+                    data = {
+                        "api_token_key": "sandbox",
+                        "token": jwt.encode(token_data, secret, algorithm='HS256').decode('utf-8'),
+                        "files": [
+                            {
+                                "content-type": "application/pdf",
+                                "content": b64_pdf.decode('utf-8'),
+                                "description": "PO00018",
+                                "checksum": hashlib.sha256(str(b64_pdf).encode('utf-8')).hexdigest()
+                            }
+                        ]
+                    }
+
+                    r = requests.post("https://api.firma.cert.digital.gob.cl/firma/v2/files/tickets", json=data)
+
+                    if r.status_code == 200:
+                        data = r.json()
+
+                        if 'files' in data.keys():
+                            signature = data['files'][0]
+
+                            if signature['status'] == "OK":
+                                self.env['ir.attachment'].create({
+                                    'name': "PO00018",
+                                    'type': 'binary',
+                                    'datas': signature['content'],
+                                    'store_fname': "PO00018",
+                                    'res_model': 'purchase.order',
+                                    'res_id': self.order_id.id,
+                                    'mimetype': 'application/pdf'
+                                })
+                                
+                except Exception as error:
+                    print(error)
+            
+
             if next_step:
                 next_approval = self.env['custom.workflow.approval'].search(
                     [('order_id', '=', self.order_id.id), ('step_id', '=', next_step.id)],
@@ -69,8 +131,6 @@ class CustomWorkflowApproval(models.Model):
                 next_approval.write({'state': 'pending'})
 
                 # Notificar como actividad
-                import datetime
-                
                 user_ids = next_approval.user_ids.mapped('id')
                 todos = []
 
@@ -82,7 +142,7 @@ class CustomWorkflowApproval(models.Model):
                         'summary': 'Solicitud de aprobación de compra',
                         'note': '',
                         'activity_type_id': 4,
-                        'date_deadline': datetime.date.today(),
+                        'date_deadline': date.today(),
                     })
 
                 self.env['mail.activity'].create(todos)
@@ -116,3 +176,11 @@ class PurchaseOrder(models.Model):
                             'step_id': step.id,
                             'state': 'pending' if i == 0 else 'new'
                         })
+
+# TODO: Purchase order line hereda analytic acount de Purchase Order
+
+
+class User(models.Model):
+    _inherit = ['res.users']
+
+    digital_sign = fields.Binary(string='Firma')
