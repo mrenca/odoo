@@ -2,8 +2,9 @@
 
 from odoo import _, models, Command
 from odoo.tools import float_repr
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools.float_utils import float_round
+from odoo.tools.misc import formatLang
 
 from zeep import Client
 
@@ -110,6 +111,16 @@ class AccountEdiCommon(models.AbstractModel):
     # -------------------------------------------------------------------------
     # TAXES
     # -------------------------------------------------------------------------
+
+    def _validate_taxes(self, invoice):
+        """ Validate the structure of the tax repartition lines (invalid structure could lead to unexpected results)
+        """
+        for tax in invoice.invoice_line_ids.tax_ids:
+            try:
+                tax._validate_repartition_lines()
+            except ValidationError as e:
+                error_msg = _("Tax '%s' is invalid: %s", tax.name, e.args[0])  # args[0] gives the error message
+                raise ValidationError(error_msg)
 
     def _get_tax_unece_codes(self, invoice, tax):
         """
@@ -261,7 +272,14 @@ class AccountEdiCommon(models.AbstractModel):
         else:
             return
         if existing_invoice and existing_invoice.move_type != move_type:
-            return
+            # with an email alias to create account_move, first the move is created (using alias_defaults, which
+            # contains move_type = 'out_invoice') then the attachment is decoded, if it represents a credit note,
+            # the move type needs to be changed to 'out_refund'
+            types = {move_type, existing_invoice.move_type}
+            if types == {'out_invoice', 'out_refund'} or types == {'in_invoice', 'in_refund'}:
+                existing_invoice.move_type = move_type
+            else:
+                return
 
         with (existing_invoice or self.env['account.move']).with_context(
             account_predictive_bills_disable_prediction=True,
@@ -300,7 +318,7 @@ class AccountEdiCommon(models.AbstractModel):
                 # (Windows or Linux style) and/or the name of the xml instead of the pdf.
                 # Get only the filename with a pdf extension.
                 name = attachment_name.text.split('\\')[-1].split('/')[-1].split('.')[0] + '.pdf'
-                attachments |= self.env['ir.attachment'].create({
+                attachment = self.env['ir.attachment'].create({
                     'name': name,
                     'res_id': invoice.id,
                     'res_model': 'account.move',
@@ -308,10 +326,30 @@ class AccountEdiCommon(models.AbstractModel):
                     'type': 'binary',
                     'mimetype': 'application/pdf',
                 })
+                # Upon receiving an email (containing an xml) with a configured alias to create invoice, the xml is
+                # set as the main_attachment. To be rendered in the form view, the pdf should be the main_attachment.
+                if invoice.message_main_attachment_id and \
+                        invoice.message_main_attachment_id.name.endswith('.xml') and \
+                        'pdf' not in invoice.message_main_attachment_id.mimetype:
+                    invoice.message_main_attachment_id = attachment
+                attachments |= attachment
         if attachments:
             invoice.with_context(no_new_invoice=True).message_post(attachment_ids=attachments.ids)
 
         return invoice
+
+    def _import_retrieve_and_fill_partner(self, invoice, name, phone, mail, vat, country_code=False):
+        """ Retrieve the partner, if no matching partner is found, create it (only if he has a vat and a name)
+        """
+        invoice.partner_id = self.env['account.edi.format']._retrieve_partner(name=name, phone=phone, mail=mail, vat=vat)
+        if not invoice.partner_id and name and vat:
+            partner_vals = {'name': name, 'email': mail, 'phone': phone}
+            country = self.env.ref(f'base.{country_code.lower()}', raise_if_not_found=False) if country_code else False
+            if country:
+                partner_vals['country_id'] = country.id
+            invoice.partner_id = self.env['res.partner'].create(partner_vals)
+            if vat and self.env['res.partner']._run_vat_test(vat, country, invoice.partner_id.is_company):
+                invoice.partner_id.vat = vat
 
     def _import_fill_invoice_allowance_charge(self, tree, invoice, journal, qty_factor):
         logs = []
@@ -392,6 +430,7 @@ class AccountEdiCommon(models.AbstractModel):
 
     def _import_fill_invoice_down_payment(self, invoice, prepaid_node, qty_factor):
         """
+        DEPRECATED: removed in master
         Creates a down payment line on the invoice at import if prepaid_node (TotalPrepaidAmount in CII,
         PrepaidAmount in UBL) exists.
         qty_factor -1 if the xml is labelled as an invoice but has negative amounts -> conversion into a credit note
@@ -414,6 +453,19 @@ class AccountEdiCommon(models.AbstractModel):
                     }),
                 ]
             })
+
+    def _import_log_prepaid_amount(self, invoice_form, prepaid_node, qty_factor):
+        """
+        Log a message in the chatter at import if prepaid_node (TotalPrepaidAmount in CII, PrepaidAmount in UBL) exists.
+        """
+        prepaid_amount = float(prepaid_node.text) if prepaid_node is not None else 0.0
+        if not invoice_form.currency_id.is_zero(prepaid_amount):
+            amount = prepaid_amount * qty_factor
+            formatted_amount = formatLang(self.env, amount, currency_obj=invoice_form.currency_id)
+            return [
+                _("A payment of %s was detected.", formatted_amount)
+            ]
+        return []
 
     def _import_fill_invoice_line_values(self, tree, xpath_dict, invoice_line, qty_factor):
         """
