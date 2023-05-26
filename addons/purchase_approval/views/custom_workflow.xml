@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <group name="messaging" position="after">
                 <group name="purchase_signature" string="Firma digital">
-                    <field name="digital_sign" widget="signature_stu"/>
+                    <field name="digital_sign" widget="signature"/>
                 </group>
             </group>
         </field>

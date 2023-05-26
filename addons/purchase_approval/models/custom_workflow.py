@@ -31,6 +31,7 @@ class CustomWorkflowApproval(models.Model):
     can_approve = fields.Boolean(compute="_compute_can_approve")
     manager_approval = fields.Boolean(related='step_id.manager_approval', readonly=True)
     sign_required = fields.Boolean(related='step_id.sign_required', readonly=True)
+    is_signed = fields.Boolean(string='Firmada', default = False)
     state = fields.Selection([
         ('new', 'Nueva'),
         ('pending', 'Pendiente'),
@@ -63,66 +64,6 @@ class CustomWorkflowApproval(models.Model):
                 order = 'sequence ASC'
             )
 
-            if self.sign_required:
-                # Obtener la firmagob
-                from datetime import datetime, date, timedelta
-                import pytz
-                import requests
-                import hashlib
-                import jwt
-                import base64
-
-                try:
-                    sclTz = pytz.timezone("America/Santiago")
-                    now = datetime.now(sclTz)
-                    now_plus_10 = now + timedelta(minutes=10)
-                    pdf = self.env['ir.actions.report']._render_qweb_pdf('purchase.action_report_purchase_order', res_ids=[self.order_id.id])
-                    b64_pdf = base64.b64encode(pdf[0])
-
-                    token_data = {
-                        "entity": "Subsecretaría General de la Presidencia",
-                        "run": "22222222",
-                        "expiration": now_plus_10.strftime('%Y-%m-%dT%H:%M:%S'),
-                        "purpose": "Desatendido"
-                    }
-                    secret = "27a216342c744f89b7b82fa290519ba0"
-
-                    data = {
-                        "api_token_key": "sandbox",
-                        "token": jwt.encode(token_data, secret, algorithm='HS256').decode('utf-8'),
-                        "files": [
-                            {
-                                "content-type": "application/pdf",
-                                "content": b64_pdf.decode('utf-8'),
-                                "description": "PO00018",
-                                "checksum": hashlib.sha256(str(b64_pdf).encode('utf-8')).hexdigest()
-                            }
-                        ]
-                    }
-
-                    r = requests.post("https://api.firma.cert.digital.gob.cl/firma/v2/files/tickets", json=data)
-
-                    if r.status_code == 200:
-                        data = r.json()
-
-                        if 'files' in data.keys():
-                            signature = data['files'][0]
-
-                            if signature['status'] == "OK":
-                                self.env['ir.attachment'].create({
-                                    'name': "PO00018",
-                                    'type': 'binary',
-                                    'datas': signature['content'],
-                                    'store_fname': "PO00018",
-                                    'res_model': 'purchase.order',
-                                    'res_id': self.order_id.id,
-                                    'mimetype': 'application/pdf'
-                                })
-                                
-                except Exception as error:
-                    print(error)
-            
-
             if next_step:
                 next_approval = self.env['custom.workflow.approval'].search(
                     [('order_id', '=', self.order_id.id), ('step_id', '=', next_step.id)],
@@ -131,6 +72,7 @@ class CustomWorkflowApproval(models.Model):
                 next_approval.write({'state': 'pending'})
 
                 # Notificar como actividad
+                from datetime import date
                 user_ids = next_approval.user_ids.mapped('id')
                 todos = []
 
@@ -163,12 +105,12 @@ class PurchaseOrder(models.Model):
 
     @api.constrains('state')
     def _check_state(self):
-        if self.state == 'to approve':
-            workflows = self.env['custom.workflow'].search([('entity', '=', 'purchase.order')])
+        workflows = self.env['custom.workflow'].search([('entity', '=', 'purchase.order')])
+        CustomWorkflowApproval = self.env['custom.workflow.approval']
 
-            if workflows[0]:
-                CustomWorkflowApproval = self.env['custom.workflow.approval']
-
+        # Si tiene un flujo asociado al modelo
+        if workflows[0]:
+            if self.state == 'to approve':
                 for i, step in enumerate(workflows[0].step):
                     if not CustomWorkflowApproval.search([('order_id', '=', self.id), ('step_id', '=', step.id)]).exists():
                         CustomWorkflowApproval.create({
@@ -176,6 +118,72 @@ class PurchaseOrder(models.Model):
                             'step_id': step.id,
                             'state': 'pending' if i == 0 else 'new'
                         })
+            elif self.state == 'purchase':
+                try:
+                    from datetime import datetime, timedelta
+                    import pytz
+                    import requests
+                    import hashlib
+                    import jwt
+                    import base64
+
+                    sclTz = pytz.timezone("America/Santiago")
+                    now = datetime.now(sclTz)
+                    now_plus_10 = now + timedelta(minutes=10)
+                    pdf = self.env['ir.actions.report']._render_qweb_pdf('purchase.action_report_purchase_order', res_ids=[self.id])
+                    b64_pdf = base64.b64encode(pdf[0])
+
+                    for i, step in enumerate(workflows[0].step):
+                        # Solo tenemos un usuario de pruebas
+                        if step.sign_required:
+                            step_approval = CustomWorkflowApproval.search([('order_id', '=', self.id), ('step_id', '=', step.id)])
+
+                            # Obtener la firmagob
+                            token_data = {
+                                "entity": "Subsecretaría General de la Presidencia",
+                                "run": "22222222",
+                                "expiration": now_plus_10.strftime('%Y-%m-%dT%H:%M:%S'),
+                                "purpose": "Desatendido"
+                            }
+                            secret = "27a216342c744f89b7b82fa290519ba0"
+
+                            data = {
+                                "api_token_key": "sandbox",
+                                "token": jwt.encode(token_data, secret, algorithm='HS256').decode('utf-8'),
+                                "files": [
+                                    {
+                                        "content-type": "application/pdf",
+                                        "content": b64_pdf.decode('utf-8'),
+                                        "description": "PO00018",
+                                        "checksum": hashlib.sha256(str(b64_pdf).encode('utf-8')).hexdigest()
+                                    }
+                                ]
+                            }
+
+                            r = requests.post("https://api.firma.cert.digital.gob.cl/firma/v2/files/tickets", json=data)
+
+                            if r.status_code == 200:
+                                data = r.json()
+
+                                if 'files' in data.keys():
+                                    signature = data['files'][0]
+
+                                    if signature['status'] == "OK":
+                                        step_approval.write({'is_signed': True})
+                                        b64_pdf = signature['content']
+
+                    # Guarda el resultado como adjunto a la orden
+                    self.env['ir.attachment'].create({
+                        'name': self.name,
+                        'type': 'binary',
+                        'datas': b64_pdf,
+                        'store_fname': self.name,
+                        'res_model': 'purchase.order',
+                        'res_id': self.id,
+                        'mimetype': 'application/pdf'
+                    })
+                except Exception as error:
+                    print(error)
 
 # TODO: Purchase order line hereda analytic acount de Purchase Order
 
